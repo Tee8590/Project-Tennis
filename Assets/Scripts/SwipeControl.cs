@@ -52,7 +52,7 @@ public class SwipeControl : MonoBehaviour
     {
         while (true)
         {
-            trail.transform.position = inputManager.PrimaryPosition(1f);
+            trail.transform.position = inputManager.PrimaryPosition(10f);
             yield return null;
         }
         
@@ -70,7 +70,7 @@ public class SwipeControl : MonoBehaviour
     {
         if (Vector2.Distance(startPosition, endPosition) >= minimumDistance && (endTime - startTime) <= maxTime)
         {
-            Debug.DrawLine(startPosition, endPosition, Color.red, 5f);
+            //Debug.DrawLine(startPosition, endPosition, Color.red, 5f);
            Vector3 direction = endPosition - startPosition;
            Vector2 direction2D = new Vector2(direction.x, direction.y).normalized;
          //  Vector2 middlePosition = (startPosition + endPosition) / 2f + Vector2.up * 100f;
@@ -81,21 +81,20 @@ public class SwipeControl : MonoBehaviour
 
             SwipeDirection(direction2D);
 
-           DrawQuadraticBezierPoint(startPosition, midPoint, endPoint);
-            //Debug.Log(direction+"direction");
+           DrawQuadraticBezierPoint(player.transform.position, midPoint, endPoint);
+            
         }
     }
     public void DrawQuadraticBezierPoint(Vector3 start, Vector3 middle, Vector3 end)
     {
 
         List<Vector3> path = new List<Vector3>();
-        int noOfPoints = 20;
+        int noOfPoints = 50;
 
         float distance2D = Vector2.Distance(start, end);
         GameObject playerBall = Instantiate(ball);
-
-        end.z = (end.z * 10 * distance2D);//making it endPosition extent to z * multiple of the swipe distance
-        Debug.Log(end);
+        end.z = (end.z + 0.4f * distance2D);//making the endPosition extent to z * multiple of the swipe distance
+        Debug.Log("end position after" + end);
         middle = (start + end) /2f + Vector3.up * distance2D;
         for (int i = 0; i <= noOfPoints; i++)
         {
@@ -104,20 +103,44 @@ public class SwipeControl : MonoBehaviour
             //Vector3 point
             path.Add(CalculateQuadraticBezierPoint(start, middle, end, t));
 
-            //point.z = distance2D * (4 * t * (1 - t)); // nice z curve
-            //path.Add(point);
-
+        }
+        for (int i = 1; i < path.Count; i++)
+        {
+            Debug.DrawLine(path[i - 1], path[i], Color.red, 2f);
         }
         StartCoroutine(MoveAlongPath(playerBall, path, 1.0f));
     }
-   public IEnumerator MoveAlongPath(GameObject ball, List<Vector3> path, float duration)
+    public IEnumerator MoveAlongPath(GameObject ball, List<Vector3> path, float duration)
     {
-        float stepTime = duration / (path.Count - 1);
-        for (int i = 0; i < path.Count; i++)
+        float totalLength = path.Count - 1;
+        float elapsed = 0f;
+        while (elapsed < duration)
         {
-            ball.transform.position = path[i];
-            yield return new WaitForSeconds(stepTime);
+            // figure out which segment we’re in, and the local t
+            float t = elapsed / duration * totalLength;
+            int i = Mathf.FloorToInt(t);
+            float u = t - i;              // local interpolation between path[i] -> path[i+1]
+
+            if (i < path.Count - 1)
+                ball.transform.position = Vector3.Lerp(path[i], path[i + 1], u);
+
+            elapsed += Time.deltaTime;
+            yield return null;
         }
+        
+        AddForceAtTheEnd(path, ball);
+
+    }
+    public void AddForceAtTheEnd(List<Vector3> path, GameObject ball)
+    {
+        Vector3 start = path[path.Count - 2];
+        Vector3 end    = path[path.Count - 1];
+        Vector3 direction = end - start;
+
+        Rigidbody rb = ball.GetComponent<Rigidbody>();
+        rb.WakeUp();
+        rb.AddForce(direction *8f, ForceMode.Impulse);
+        Debug.Log("Force direction: " + direction);
     }
 
     private Vector3 CalculateQuadraticBezierPoint(Vector3 p0, Vector3 p1, Vector3 p2, float t)
