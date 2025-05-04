@@ -93,8 +93,8 @@ public class SwipeControl : MonoBehaviour
 
         float distance2D = Vector2.Distance(start, end);
         GameObject playerBall = Instantiate(ball);
-        end.z = (end.z + 0.4f * distance2D);//making the endPosition extent to z * multiple of the swipe distance
-        Debug.Log("end position after" + end);
+        end.z = (end.z + 0.2f * distance2D);//making the endPosition extent to z * multiple of the swipe distance
+        //Debug.Log("end position after" + end);
         middle = (start + end) /2f + Vector3.up * distance2D;
         for (int i = 0; i <= noOfPoints; i++)
         {
@@ -140,7 +140,7 @@ public class SwipeControl : MonoBehaviour
         Rigidbody rb = ball.GetComponent<Rigidbody>();
         rb.WakeUp();
         rb.AddForce(direction *8f, ForceMode.Impulse);
-        Debug.Log("Force direction: " + direction);
+       /* Debug.Log("Force direction: " + direction);*/
     }
 
     private Vector3 CalculateQuadraticBezierPoint(Vector3 p0, Vector3 p1, Vector3 p2, float t)

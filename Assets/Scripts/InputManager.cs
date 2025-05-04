@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -50,5 +51,9 @@ public class InputManager : MonoBehaviour
     public Vector2 PrimaryPosition(float zDepth = 10f)
     {
         return Utils.ScreenToWorld(mainCamera, inputSystem.Touch.PrimaryPosition.ReadValue<Vector2>(), zDepth);
+    }
+    public void KillBall()
+    {
+        
     }
 }
