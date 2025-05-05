@@ -6,15 +6,18 @@ using UnityEngine.InputSystem;
 public class InputManager : MonoBehaviour
 {
     private InputSystem_Actions inputSystem;
-
+    private InputAction fireAction;
     #region Events
     public delegate void StartTouch(Vector2 position, float time);
     public event StartTouch OnStartTouch;
     public delegate void EndTouch(Vector2 position, float time);
     public event EndTouch OnEndTouch;
     #endregion
+    public InputAction FireAction => inputSystem.Player.Jump;
 
     private Camera mainCamera;
+
+
     private void Awake()
     {
         inputSystem = new InputSystem_Actions();
@@ -52,7 +55,7 @@ public class InputManager : MonoBehaviour
     {
         return Utils.ScreenToWorld(mainCamera, inputSystem.Touch.PrimaryPosition.ReadValue<Vector2>(), zDepth);
     }
-    public void KillBall()
+    public void Ball()
     {
         
     }

@@ -2,17 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class SwipeControl : MonoBehaviour
 {
     [SerializeField]
     private InputManager inputManager;
+   
 
     private Vector2 startPosition;
     private float startTime;
     private Vector2 endPosition;
     private float endTime;
-
+    private GameObject playerBall;
     [SerializeField]
     private float minimumDistance =.2f;
     [SerializeField]
@@ -27,10 +29,12 @@ public class SwipeControl : MonoBehaviour
     private GameObject player;
     private Coroutine coroutine;
 
+    private InputAction fireAction;
     private void OnEnable()
     {
         inputManager.OnStartTouch += SwipeStart;
         inputManager.OnEndTouch += SwipeEnd;
+        fireAction = inputManager.FireAction;
     }
     private void OnDisable()
     {
@@ -38,7 +42,10 @@ public class SwipeControl : MonoBehaviour
         inputManager.OnStartTouch -= SwipeStart;
         inputManager.OnEndTouch -= SwipeEnd;
     }
-    
+    private void Awake()
+    {
+       
+    }
     private void SwipeStart(Vector2 position, float time)
     {
         
@@ -47,6 +54,14 @@ public class SwipeControl : MonoBehaviour
         trail.SetActive(true);
         trail.transform.position = position;
         coroutine =  StartCoroutine(Trail());
+    }
+    private void Update()
+    {
+     
+         if (fireAction != null && fireAction.WasPressedThisFrame())
+        {
+            SimulateSwipeRHS();
+        }
     }
     private IEnumerator Trail()
     {
@@ -66,10 +81,12 @@ public class SwipeControl : MonoBehaviour
         DetectSwipe();
     }
 
-    private void DetectSwipe()
+    public void DetectSwipe()
     {
         if (Vector2.Distance(startPosition, endPosition) >= minimumDistance && (endTime - startTime) <= maxTime)
         {
+            Debug.Log("Start :"+startPosition+", "+"End :"+endPosition);
+            Debug.Log("TIme"+(endTime - startTime));
             //Debug.DrawLine(startPosition, endPosition, Color.red, 5f);
            Vector3 direction = endPosition - startPosition;
            Vector2 direction2D = new Vector2(direction.x, direction.y).normalized;
@@ -85,6 +102,39 @@ public class SwipeControl : MonoBehaviour
             
         }
     }
+
+    public void SimulateSwipeLHS()
+    {
+        Random.InitState(System.DateTime.Now.Millisecond);
+        Vector2 simStartSwipe = new Vector2(Random.Range(293, 296.5f), Random.Range(0.5f, .75f));
+        Vector2 simEndSwipe   = new Vector2(Random.Range(293, 296.5f), Random.Range(0.5f, .75f));
+        float simSwipeLength = Random.Range(0.12f, 0.15f);
+
+        SwipeStart(simStartSwipe, simSwipeLength);
+        SwipeEnd(simEndSwipe, simSwipeLength);
+
+    }
+    public void SimulateSwipeRHS()
+    {
+        Random.InitState(System.DateTime.Now.Millisecond);
+        Vector2 simStartSwipe = new Vector2(Random.Range(297.5f, 300), Random.Range(0.8f, 1f));
+        Vector2 simEndSwipe   = new Vector2(Random.Range(297.5f, 300), Random.Range(0.8f, 1f));
+        float simSwipeLength = Random.Range(0.12f, 0.15f);
+
+        SwipeStart(simStartSwipe, simSwipeLength);
+        SwipeEnd(simEndSwipe, simSwipeLength);
+
+    }
+    //public void SimulateSwipeRHS()
+    //{
+    //    Vector2 simStartSwipe = new Vector2(Random.Range(293, 300), Random.Range(0.5f, 1f));
+    //    Vector2 simEndSwipe   = new Vector2(Random.Range(293, 300), Random.Range(0.5f, 1f));
+    //    float simSwipeLength = Random.Range(0.12f, 0.15f);
+
+    //    SwipeStart(simStartSwipe, simSwipeLength);
+    //    SwipeEnd(simEndSwipe, simSwipeLength);
+
+    //}
     public void DrawQuadraticBezierPoint(Vector3 start, Vector3 middle, Vector3 end)
     {
 
@@ -92,7 +142,9 @@ public class SwipeControl : MonoBehaviour
         int noOfPoints = 50;
 
         float distance2D = Vector2.Distance(start, end);
-        GameObject playerBall = Instantiate(ball);
+
+        // GameObject playerBall = Instantiate(ball);
+        CreateBall();
         end.z = (end.z + 0.2f * distance2D);//making the endPosition extent to z * multiple of the swipe distance
         //Debug.Log("end position after" + end);
         middle = (start + end) /2f + Vector3.up * distance2D;
@@ -109,6 +161,13 @@ public class SwipeControl : MonoBehaviour
             Debug.DrawLine(path[i - 1], path[i], Color.red, 2f);
         }
         StartCoroutine(MoveAlongPath(playerBall, path, 1.0f));
+    }
+    public void CreateBall()
+    {
+        if (GameObject.FindGameObjectWithTag("Ball") == null)
+        {
+             playerBall = Instantiate(ball);
+        }
     }
     public IEnumerator MoveAlongPath(GameObject ball, List<Vector3> path, float duration)
     {
@@ -164,19 +223,19 @@ public class SwipeControl : MonoBehaviour
 
         if(Vector3.Dot(Vector3.up, direction) > directionalThreshold)
         {
-            Debug.Log("swipedUp");
+          //  Debug.Log("swipedUp");
         }
         else if(Vector3.Dot(Vector3.down, direction) > directionalThreshold)
         {
-            Debug.Log("swipedDown");
+            //Debug.Log("swipedDown");
         }
         else if(Vector3.Dot(Vector3.left, direction) > directionalThreshold)
         {
-            Debug.Log("swipedLeft");
+            //Debug.Log("swipedLeft");
         }
         else if(Vector3.Dot(Vector3.right, direction) > directionalThreshold)
         {
-            Debug.Log("swipedRight");
+            //Debug.Log("swipedRight");
         }
     }
    

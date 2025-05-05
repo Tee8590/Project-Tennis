@@ -12,6 +12,7 @@ public class BallHitDetection : MonoBehaviour
       if(ballPrefab !=null)
         { ballRb = ballPrefab.GetComponent<Rigidbody>(); }
 
+
     }
     void OnTriggerEnter(Collider other)
     {
