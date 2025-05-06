@@ -67,7 +67,7 @@ public class SwipeControl : MonoBehaviour
     {
         while (true)
         {
-            trail.transform.position = inputManager.PrimaryPosition(10f);
+            trail.transform.position = inputManager.PrimaryPosition(20f);
             yield return null;
         }
         

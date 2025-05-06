@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Utils : MonoBehaviour
 {
-  public static Vector3 ScreenToWorld(Camera camera, Vector3 position, float zDepth = 10f)
+  public static Vector3 ScreenToWorld(Camera camera, Vector3 position, float zDepth = 20f)
     {
         
         Vector3 pos = new Vector3(position.x, position.y, zDepth);

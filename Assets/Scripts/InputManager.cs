@@ -51,7 +51,7 @@ public class InputManager : MonoBehaviour
 
     }
     //position of the finger, for Trail Rendered
-    public Vector2 PrimaryPosition(float zDepth = 10f)
+    public Vector2 PrimaryPosition(float zDepth = 20f)
     {
         return Utils.ScreenToWorld(mainCamera, inputSystem.Touch.PrimaryPosition.ReadValue<Vector2>(), zDepth);
     }

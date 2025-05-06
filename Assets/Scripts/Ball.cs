@@ -7,8 +7,8 @@ public class Ball : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-/*        rb = GetComponent<Rigidbody>(); 
-*/        
+        //rb = GetComponent<Rigidbody>();
+      
     }
     //void OnCollisionEnter(Collision collision)
     //{
@@ -24,8 +24,8 @@ public class Ball : MonoBehaviour
     //    //rb.angularVelocity *= slowdownFactor;
     //}
     // Update is called once per frame
-    void Update()
-    {
-        //rb.AddForce(-Vector3.forward * 5f * Time.deltaTime, ForceMode.Impulse);
-    }
+    //void Update()
+    //{
+    //    rb.AddForce(-Vector3.forward * 2f * Time.deltaTime, ForceMode.Impulse);
+    //}
 }
