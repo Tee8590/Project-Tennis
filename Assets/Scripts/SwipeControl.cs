@@ -8,13 +8,14 @@ public class SwipeControl : MonoBehaviour
 {
     [SerializeField]
     private InputManager inputManager;
-   
 
+    private Vector2 direction2D;
     private Vector2 startPosition;
     private float startTime;
     private Vector2 endPosition;
     private float endTime;
-    private GameObject playerBall;
+    private Rigidbody ballrb;
+    private Rigidbody currentBallRb;
     [SerializeField]
     private float minimumDistance =.2f;
     [SerializeField]
@@ -28,7 +29,8 @@ public class SwipeControl : MonoBehaviour
     [SerializeField]
     private GameObject player;
     private Coroutine coroutine;
-
+    private Coroutine slowBallCoroutine;
+    private BallHitDetection ballHitDetection;
     private InputAction fireAction;
     private void OnEnable()
     {
@@ -44,7 +46,8 @@ public class SwipeControl : MonoBehaviour
     }
     private void Awake()
     {
-       
+        player.GetComponentInChildren<BoxCollider>();
+       ballHitDetection =  player.GetComponentInChildren<BallHitDetection>();
     }
     private void SwipeStart(Vector2 position, float time)
     {
@@ -60,7 +63,8 @@ public class SwipeControl : MonoBehaviour
      
          if (fireAction != null && fireAction.WasPressedThisFrame())
         {
-            SimulateSwipeRHS();
+            //SimulateSwipeRHS();
+            //OpponentBallDebug();
         }
     }
     private IEnumerator Trail()
@@ -85,21 +89,26 @@ public class SwipeControl : MonoBehaviour
     {
         if (Vector2.Distance(startPosition, endPosition) >= minimumDistance && (endTime - startTime) <= maxTime)
         {
-            Debug.Log("Start :"+startPosition+", "+"End :"+endPosition);
-            Debug.Log("TIme"+(endTime - startTime));
+        //    Debug.Log("Start :"+startPosition+", "+"End :"+endPosition);
+        //    Debug.Log("TIme"+(endTime - startTime));
             //Debug.DrawLine(startPosition, endPosition, Color.red, 5f);
+
+            //direction of the ball in 2D, z is 0 currently
            Vector3 direction = endPosition - startPosition;
-           Vector2 direction2D = new Vector2(direction.x, direction.y).normalized;
+           direction2D = new Vector2(direction.x, direction.y).normalized;
          //  Vector2 middlePosition = (startPosition + endPosition) / 2f + Vector2.up * 100f;
 
             //making it endPosition & middlePosition Vector3
             Vector3 endPoint = new Vector3(endPosition.x, endPosition.y, 0);
-            Vector3 midPoint = new Vector3(endPoint.x, endPoint.y, 0);
-
+            Vector3 midPoint = new Vector3(0,0,0);
             SwipeDirection(direction2D);
 
-           DrawQuadraticBezierPoint(player.transform.position, midPoint, endPoint);
+            CreateBall();
+
+            BallMovement(currentBallRb, direction);
             
+            //DrawQuadraticBezierPoint(player.transform.position, midPoint, endPoint);
+
         }
     }
 
@@ -135,6 +144,7 @@ public class SwipeControl : MonoBehaviour
     //    SwipeEnd(simEndSwipe, simSwipeLength);
 
     //}
+   
     public void DrawQuadraticBezierPoint(Vector3 start, Vector3 middle, Vector3 end)
     {
 
@@ -145,7 +155,8 @@ public class SwipeControl : MonoBehaviour
 
         // GameObject playerBall = Instantiate(ball);
         CreateBall();
-        end.z = (end.z + 0.2f * distance2D);//making the endPosition extent to z * multiple of the swipe distance
+        
+        end.z = (0.2f * distance2D);//making the endPosition extent to z * multiple of the swipe distance
         //Debug.Log("end position after" + end);
         middle = (start + end) /2f + Vector3.up * distance2D;
         for (int i = 0; i <= noOfPoints; i++)
@@ -160,15 +171,27 @@ public class SwipeControl : MonoBehaviour
         {
             Debug.DrawLine(path[i - 1], path[i], Color.red, 2f);
         }
-        StartCoroutine(MoveAlongPath(playerBall, path, 1.0f));
+        StartCoroutine(MoveAlongPath(ball, path, 1.0f));
     }
+
     public void CreateBall()
     {
         if (GameObject.FindGameObjectWithTag("Ball") == null)
         {
-             playerBall = Instantiate(ball);
+             ball = Instantiate(ball);
         }
     }
+    /*public void OpponentBallDebug()
+    {
+        //if (GameObject.FindGameObjectWithTag("Ball") == null)
+        {
+            Vector3 position = new Vector3(player.transform.position.x, player.transform.position.y, player.transform.position.z + 10f);
+             ball = Instantiate(ball, position, Quaternion.identity);
+
+            Rigidbody rb = ball.GetComponent<Rigidbody>();
+            rb.AddForce(-Vector3.forward * 50f * Time.deltaTime, ForceMode.Impulse);
+        }
+    }*/
     public IEnumerator MoveAlongPath(GameObject ball, List<Vector3> path, float duration)
     {
         float totalLength = path.Count - 1;
@@ -196,9 +219,9 @@ public class SwipeControl : MonoBehaviour
         Vector3 end    = path[path.Count - 1];
         Vector3 direction = end - start;
 
-        Rigidbody rb = ball.GetComponent<Rigidbody>();
-        rb.WakeUp();
-        rb.AddForce(direction *8f, ForceMode.Impulse);
+        ballrb = ball.GetComponent<Rigidbody>();
+        ballrb.WakeUp();
+        ballrb.AddForce(direction *8f, ForceMode.Impulse);
        /* Debug.Log("Force direction: " + direction);*/
     }
 
@@ -216,6 +239,18 @@ public class SwipeControl : MonoBehaviour
         point += tt * p2;
         //point.z = point.z * t; //adding the z axis for depth
         return point;
+    }
+    public void BallMovement(Rigidbody rb,Vector3 direction )
+    {
+        rb = ball.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            //if(!ballHitDetection == true)
+            //    StopCoroutine(slowBallCoroutine);
+            rb.gameObject.transform.position = new Vector3(player.transform.position.x, player.transform.position.y, player.transform.position.z + 0.5f);
+
+            rb.gameObject.GetComponent<Ball>().CreateBallMovement(startPosition, direction);
+        }
     }
 
     private void SwipeDirection(Vector2 direction)

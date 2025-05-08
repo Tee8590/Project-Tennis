@@ -6,19 +6,25 @@ public class BallHitDetection : MonoBehaviour
     private Rigidbody ballRb;
     private GameObject ballPrefab;
     public float slowdownFactor = 0.7f;
+    public LayerMask layerMask;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        ballPrefab =  GameObject.FindGameObjectWithTag("Ball");
-      if(ballPrefab !=null)
-        { ballRb = ballPrefab.GetComponent<Rigidbody>(); }
-
+        layerMask = ~LayerMask.GetMask("Ground");
+       
 
     }
-    void OnTriggerEnter(Collider other)
+    public void OnTriggerEnter(Collider other)
     {
-        if (ballRb == null || transform.position == null) return;
+        ballPrefab = GameObject.FindGameObjectWithTag("Ball");
+        if (ballPrefab != null)
+        { ballRb = ballPrefab.GetComponent<Rigidbody>(); }
 
+        if (ballRb == null || !other.gameObject.CompareTag("Ball")) {
+            Debug.Log("no ballRb ");
+            Debug.Log(other.gameObject.ToString());
+            return; 
+        }
         // Get velocity direction
         Vector3 ballDirection = ballRb.linearVelocity.normalized;
         // Calculate direction FROM BALL TO PLAYER(collider)
@@ -30,11 +36,11 @@ public class BallHitDetection : MonoBehaviour
         //Ball is moving toward the player
         if (dot > 0)
         {
-            if (other.gameObject.CompareTag("Ball"))
-            { Debug.Log("Dot product: " + dot);
-                StartCoroutine(SlowBall(ballRb, 0.1f, 4f));
-            }
-            Debug.Log("Ball is moving toward the player");
+           Debug.Log("Dot product: " + dot);
+           StartCoroutine(SlowBall(ballRb, 0.1f,1f));
+
+                    
+           Debug.Log("Ball is moving toward the player");
 
         }
         else
@@ -42,19 +48,18 @@ public class BallHitDetection : MonoBehaviour
             Debug.Log("Ball is moving away from the player");
         }
     }
-    private IEnumerator SlowBall(Rigidbody rb, float slowFactor, float duration)
+    public IEnumerator SlowBall(Rigidbody rb, float slowFactor, float duration)
     {
         // Remember the original velocity
         Vector3 originalVelocity = rb.linearVelocity;
 
         // Apply slowdown
-        rb.linearVelocity = originalVelocity * slowFactor;
-
+        rb.useGravity = false; rb.linearVelocity = originalVelocity * slowFactor;
         // Wait
         yield return new WaitForSeconds(duration);
 
         // Restore original speed (preserving direction)
-        rb.linearVelocity = originalVelocity;
+        rb.useGravity = true; rb.linearVelocity = originalVelocity;
     }
     // Update is called once per frame
     void Update()
