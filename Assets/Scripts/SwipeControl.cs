@@ -32,6 +32,8 @@ public class SwipeControl : MonoBehaviour
     private Coroutine slowBallCoroutine;
     private BallHitDetection ballHitDetection;
     private InputAction fireAction;
+    [SerializeField]
+    private Camera mainCamera;
     private void OnEnable()
     {
         inputManager.OnStartTouch += SwipeStart;
@@ -49,9 +51,22 @@ public class SwipeControl : MonoBehaviour
         player.GetComponentInChildren<BoxCollider>();
        ballHitDetection =  player.GetComponentInChildren<BallHitDetection>();
     }
-    private void SwipeStart(Vector2 position, float time)
+    private float ComputeZDepth(float planeY = 0f)
     {
-        
+        float camY = mainCamera.transform.position.y;
+        float forwardY = mainCamera.transform.forward.y;
+        // Avoid division by zero
+        if (Mathf.Approximately(forwardY, 0f))
+            forwardY = 0.0001f;
+        return (camY - planeY) / forwardY;
+    }
+    private void SwipeStart(Vector2 position, float time)
+    {/*
+        float zDepth = ComputeZDepth(0f);
+        startPosition = Utils.ScreenToWorld(
+            mainCamera,
+            new Vector3(position.x, position.y, zDepth)
+        );*/
         startPosition = position;
         startTime = time;
         trail.SetActive(true);
@@ -78,6 +93,12 @@ public class SwipeControl : MonoBehaviour
     }
     private void SwipeEnd(Vector2 position, float time)
     {
+      /*  float zDepth = ComputeZDepth(0f);
+        endPosition = Utils.ScreenToWorld(
+            mainCamera,
+            new Vector3(position.x, position.y, zDepth)
+        );*/
+
         trail.SetActive(false);
         StopCoroutine(coroutine);
         endPosition = position;
