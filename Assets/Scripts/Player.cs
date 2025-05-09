@@ -6,8 +6,7 @@ public class Player : MonoBehaviour
     private GameObject ball;
     public float moveSpeed = 20.0f;
     [SerializeField]
-    private BoxCollider HItboxcollider;
-    bool isPlayer = true;
+    private BoxCollider HItboxCollider;
     void Start()
     {
        

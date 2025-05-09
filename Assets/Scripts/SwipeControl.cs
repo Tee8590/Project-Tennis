@@ -64,14 +64,14 @@ public class SwipeControl : MonoBehaviour
          if (fireAction != null && fireAction.WasPressedThisFrame())
         {
             //SimulateSwipeRHS();
-            //OpponentBallDebug();
+            OpponentBallDebug();
         }
     }
     private IEnumerator Trail()
     {
         while (true)
         {
-            trail.transform.position = inputManager.PrimaryPosition(20f);
+            trail.transform.position = inputManager.PrimaryPosition(10f);
             yield return null;
         }
         
@@ -181,17 +181,17 @@ public class SwipeControl : MonoBehaviour
              ball = Instantiate(ball);
         }
     }
-    /*public void OpponentBallDebug()
+    public void OpponentBallDebug()
     {
-        //if (GameObject.FindGameObjectWithTag("Ball") == null)
+        if (GameObject.FindGameObjectWithTag("Ball") == null)
         {
-            Vector3 position = new Vector3(player.transform.position.x, player.transform.position.y, player.transform.position.z + 10f);
-             ball = Instantiate(ball, position, Quaternion.identity);
+            Vector3 position = new Vector3(player.transform.position.x, player.transform.position.y, player.transform.position.z + 20f);
+            ball = Instantiate(ball, position, Quaternion.identity);
 
             Rigidbody rb = ball.GetComponent<Rigidbody>();
             rb.AddForce(-Vector3.forward * 50f * Time.deltaTime, ForceMode.Impulse);
         }
-    }*/
+    }
     public IEnumerator MoveAlongPath(GameObject ball, List<Vector3> path, float duration)
     {
         float totalLength = path.Count - 1;
@@ -247,7 +247,7 @@ public class SwipeControl : MonoBehaviour
         {
             //if(!ballHitDetection == true)
             //    StopCoroutine(slowBallCoroutine);
-            rb.gameObject.transform.position = new Vector3(player.transform.position.x, player.transform.position.y, player.transform.position.z + 0.5f);
+            rb.gameObject.transform.position = new Vector3(player.transform.position.x, player.transform.position.y, player.transform.position.z + 2f);
 
             rb.gameObject.GetComponent<Ball>().CreateBallMovement(startPosition, direction);
         }
