@@ -110,10 +110,10 @@ public class SwipeControl : MonoBehaviour
     {
         if (Vector2.Distance(startPosition, endPosition) >= minimumDistance && (endTime - startTime) <= maxTime)
         {
-        //    Debug.Log("Start :"+startPosition+", "+"End :"+endPosition);
-        //    Debug.Log("TIme"+(endTime - startTime));
+            //    Debug.Log("Start :"+startPosition+", "+"End :"+endPosition);
+            //    Debug.Log("TIme"+(endTime - startTime));
             //Debug.DrawLine(startPosition, endPosition, Color.red, 5f);
-
+            float swipeTime = (endTime - startTime);
             //direction of the ball in 2D, z is 0 currently
            Vector3 direction = endPosition - startPosition;
            direction2D = new Vector2(direction.x, direction.y).normalized;
@@ -126,7 +126,7 @@ public class SwipeControl : MonoBehaviour
 
             CreateBall();
 
-            BallMovement(currentBallRb, direction);
+            BallMovement(currentBallRb, direction, swipeTime);
             
             //DrawQuadraticBezierPoint(player.transform.position, midPoint, endPoint);
 
@@ -261,7 +261,7 @@ public class SwipeControl : MonoBehaviour
         //point.z = point.z * t; //adding the z axis for depth
         return point;
     }
-    public void BallMovement(Rigidbody rb,Vector3 direction )
+    public void BallMovement(Rigidbody rb,Vector3 direction, float swipeTime)
     {
         rb = ball.GetComponent<Rigidbody>();
         if (rb != null)
@@ -270,7 +270,7 @@ public class SwipeControl : MonoBehaviour
             //    StopCoroutine(slowBallCoroutine);
             rb.gameObject.transform.position = new Vector3(player.transform.position.x, player.transform.position.y, player.transform.position.z + 2f);
 
-            rb.gameObject.GetComponent<Ball>().CreateBallMovement(startPosition, direction);
+            rb.gameObject.GetComponent<Ball>().CreateBallMovement(startPosition, direction, swipeTime);
         }
     }
 
