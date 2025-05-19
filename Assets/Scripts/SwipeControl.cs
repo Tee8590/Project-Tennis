@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
@@ -6,6 +7,7 @@ using UnityEngine.InputSystem;
 
 public class SwipeControl : MonoBehaviour
 {
+    public static event Action<SwipeControl> OnSwipe;
     [SerializeField]
     private InputManager inputManager;
 
@@ -15,7 +17,6 @@ public class SwipeControl : MonoBehaviour
     private Vector2 endPosition;
     private float endTime;
     private Rigidbody ballrb;
-    private Rigidbody currentBallRb;
     [SerializeField]
     private float minimumDistance =.2f;
     [SerializeField]
@@ -25,19 +26,20 @@ public class SwipeControl : MonoBehaviour
     [SerializeField]
     private GameObject trail;
     [SerializeField]
-    private GameObject ball;
+    private GameObject ballPrefab;
     [SerializeField]
     private GameObject player;
     private Coroutine coroutine;
     private Coroutine slowBallCoroutine;
     private BallHitDetection ballHitDetection;
     private InputAction fireAction;
-    [SerializeField]
-    private Camera mainCamera;
+    //[SerializeField]
+    //private Camera mainCamera;
     private void OnEnable()
     {
         inputManager.OnStartTouch += SwipeStart;
         inputManager.OnEndTouch += SwipeEnd;
+        BallHitDetection.OnPlayer1Hit += Player1SwingAction;
         fireAction = inputManager.FireAction;
     }
     private void OnDisable()
@@ -45,21 +47,27 @@ public class SwipeControl : MonoBehaviour
 
         inputManager.OnStartTouch -= SwipeStart;
         inputManager.OnEndTouch -= SwipeEnd;
+        BallHitDetection.OnPlayer1Hit -= Player1SwingAction;
     }
     private void Awake()
     {
-        player.GetComponentInChildren<BoxCollider>();
        ballHitDetection =  player.GetComponentInChildren<BallHitDetection>();
+        CreateBall();
     }
-    private float ComputeZDepth(float planeY = 0f)
+    public void Player1SwingAction(Collider collider)
     {
-        float camY = mainCamera.transform.position.y;
-        float forwardY = mainCamera.transform.forward.y;
-        // Avoid division by zero
-        if (Mathf.Approximately(forwardY, 0f))
-            forwardY = 0.0001f;
-        return (camY - planeY) / forwardY;
+        
+        ballrb = collider.GetComponent<Rigidbody>();
     }
+    //private float ComputeZDepth(float planeY = 0f)
+    //{
+    //    float camY = mainCamera.transform.position.y;
+    //    float forwardY = mainCamera.transform.forward.y;
+    //    // Avoid division by zero
+    //    if (Mathf.Approximately(forwardY, 0f))
+    //        forwardY = 0.0001f;
+    //    return (camY - planeY) / forwardY;
+    //}
     private void SwipeStart(Vector2 position, float time)
     {/*
         float zDepth = ComputeZDepth(0f);
@@ -78,8 +86,9 @@ public class SwipeControl : MonoBehaviour
      
          if (fireAction != null && fireAction.WasPressedThisFrame())
         {
-            //SimulateSwipeRHS();
-            OpponentBallDebug();
+            CreateBall();
+            /*//SimulateSwipeRHS();*/
+            //OpponentBallDebug();
         }
     }
     private IEnumerator Trail()
@@ -114,7 +123,7 @@ public class SwipeControl : MonoBehaviour
             //    Debug.Log("TIme"+(endTime - startTime));
             //Debug.DrawLine(startPosition, endPosition, Color.red, 5f);
             float swipeTime = (endTime - startTime);
-            //direction of the ball in 2D, z is 0 currently
+            //direction of the ballPrefab in 2D, z is 0 currently
            Vector3 direction = endPosition - startPosition;
            direction2D = new Vector2(direction.x, direction.y).normalized;
          //  Vector2 middlePosition = (startPosition + endPosition) / 2f + Vector2.up * 100f;
@@ -124,42 +133,36 @@ public class SwipeControl : MonoBehaviour
             Vector3 midPoint = new Vector3(0,0,0);
             SwipeDirection(direction2D);
 
-            CreateBall();
-
-            BallMovement(currentBallRb, direction, swipeTime);
+            
+            if(GameManager.isPlayerOneServing)
+            {
+                CreateBall();
+                BallMovement(ballrb, direction, swipeTime);
+                GameManager.isPlayerOneServing = false;
+            }
             
             //DrawQuadraticBezierPoint(player.transform.position, midPoint, endPoint);
 
         }
     }
 
-    public void SimulateSwipeLHS()
-    {
-        Random.InitState(System.DateTime.Now.Millisecond);
-        Vector2 simStartSwipe = new Vector2(Random.Range(293, 296.5f), Random.Range(0.5f, .75f));
-        Vector2 simEndSwipe   = new Vector2(Random.Range(293, 296.5f), Random.Range(0.5f, .75f));
-        float simSwipeLength = Random.Range(0.12f, 0.15f);
+    //public void SimulateSwipeLHS()
+    //{
+    //    UnityEngine.Random.InitState(System.DateTime.Now.Millisecond);
+    //    Vector2 simStartSwipe = new Vector2(UnityEngine.Random.Range(291, 294.5f), UnityEngine.Random.Range(11f, 14f));
+    //    Vector2 simEndSwipe   = new Vector2(UnityEngine.Random.Range(293, 296.5f), UnityEngine.Random.Range(0.5f, .75f));
+    //    float simSwipeLength = UnityEngine.Random.Range(0.12f, 0.16f);
 
-        SwipeStart(simStartSwipe, simSwipeLength);
-        SwipeEnd(simEndSwipe, simSwipeLength);
+    //    SwipeStart(simStartSwipe, simSwipeLength);
+    //    SwipeEnd(simEndSwipe, simSwipeLength);
 
-    }
-    public void SimulateSwipeRHS()
-    {
-        Random.InitState(System.DateTime.Now.Millisecond);
-        Vector2 simStartSwipe = new Vector2(Random.Range(297.5f, 300), Random.Range(0.8f, 1f));
-        Vector2 simEndSwipe   = new Vector2(Random.Range(297.5f, 300), Random.Range(0.8f, 1f));
-        float simSwipeLength = Random.Range(0.12f, 0.15f);
-
-        SwipeStart(simStartSwipe, simSwipeLength);
-        SwipeEnd(simEndSwipe, simSwipeLength);
-
-    }
+    //}
     //public void SimulateSwipeRHS()
     //{
-    //    Vector2 simStartSwipe = new Vector2(Random.Range(293, 300), Random.Range(0.5f, 1f));
-    //    Vector2 simEndSwipe   = new Vector2(Random.Range(293, 300), Random.Range(0.5f, 1f));
-    //    float simSwipeLength = Random.Range(0.12f, 0.15f);
+    //    UnityEngine.Random.InitState(System.DateTime.Now.Millisecond);
+    //    Vector2 simStartSwipe = new Vector2(UnityEngine.Random.Range(297.5f, 400), UnityEngine.Random.Range(0.8f, 1f));
+    //    Vector2 simEndSwipe   = new Vector2(UnityEngine.Random.Range(297.5f, 600), UnityEngine.Random.Range(0.8f, 1f));
+    //    float simSwipeLength = UnityEngine.Random.Range(1, 4);
 
     //    SwipeStart(simStartSwipe, simSwipeLength);
     //    SwipeEnd(simEndSwipe, simSwipeLength);
@@ -174,7 +177,7 @@ public class SwipeControl : MonoBehaviour
 
         float distance2D = Vector2.Distance(start, end);
 
-        // GameObject playerBall = Instantiate(ball);
+        // GameObject playerBall = Instantiate(ballPrefab);
         CreateBall();
         
         end.z = (0.2f * distance2D);//making the endPosition extent to z * multiple of the swipe distance
@@ -192,24 +195,44 @@ public class SwipeControl : MonoBehaviour
         {
             Debug.DrawLine(path[i - 1], path[i], Color.red, 2f);
         }
-        StartCoroutine(MoveAlongPath(ball, path, 1.0f));
+        StartCoroutine(MoveAlongPath(ballPrefab, path, 1.0f));
     }
 
-    public void CreateBall()
+    public Rigidbody CreateBall()
     {
         if (GameObject.FindGameObjectWithTag("Ball") == null)
         {
-             ball = Instantiate(ball);
+            GameObject ball = Instantiate(ballPrefab);  ball.name = "Ball";
+            ball.transform.position = new Vector3(player.transform.position.x,
+                player.transform.position.y,
+                player.transform.position.z + 2f);
+            ballrb = ball.GetComponent<Rigidbody>();
+            BallPhysicsOff();
+            return ballrb;
         }
+        else{
+            ballrb = GameObject.FindGameObjectWithTag("Ball").GetComponent<Rigidbody>();
+            ballrb.transform.position = new Vector3(player.transform.position.x,
+               player.transform.position.y,
+               player.transform.position.z + 2f);
+            BallPhysicsOff();
+            return ballrb;
+        }
+    }
+    public Rigidbody BallPhysicsOff()
+    {
+        ballrb.linearVelocity = Vector3.zero;
+        ballrb.angularVelocity = Vector3.zero;
+        ballrb.useGravity = false; return ballrb;
     }
     public void OpponentBallDebug()
     {
         if (GameObject.FindGameObjectWithTag("Ball") == null)
         {
             Vector3 position = new Vector3(player.transform.position.x, player.transform.position.y, player.transform.position.z + 20f);
-            ball = Instantiate(ball, position, Quaternion.identity);
+            ballPrefab = Instantiate(ballPrefab, position, Quaternion.identity);
 
-            Rigidbody rb = ball.GetComponent<Rigidbody>();
+            Rigidbody rb = ballPrefab.GetComponent<Rigidbody>();
             rb.AddForce(-Vector3.forward * 50f * Time.deltaTime, ForceMode.Impulse);
         }
     }
@@ -219,7 +242,7 @@ public class SwipeControl : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < duration)
         {
-            // figure out which segment we’re in, and the local t
+            // figure out which segment weâ€™re in, and the local t
             float t = elapsed / duration * totalLength;
             int i = Mathf.FloorToInt(t);
             float u = t - i;              // local interpolation between path[i] -> path[i+1]
@@ -248,7 +271,7 @@ public class SwipeControl : MonoBehaviour
 
     private Vector3 CalculateQuadraticBezierPoint(Vector3 p0, Vector3 p1, Vector3 p2, float t)
     {
-        //B(t) = (1 - t)²P0  +   2(1 - t)tP1        + t²P2 
+        //B(t) = (1 - t)Â²P0  +   2(1 - t)tP1        + tÂ²P2 
         //          u               u                 tt
         //          uu * p0  +   u * 2 * t * p1     + tt * p2
         float u = 1 - t;
@@ -263,13 +286,13 @@ public class SwipeControl : MonoBehaviour
     }
     public void BallMovement(Rigidbody rb,Vector3 direction, float swipeTime)
     {
-        rb = ball.GetComponent<Rigidbody>();
+        rb = ballrb;
         if (rb != null)
         {
             //if(!ballHitDetection == true)
             //    StopCoroutine(slowBallCoroutine);
-            rb.gameObject.transform.position = new Vector3(player.transform.position.x, player.transform.position.y, player.transform.position.z + 2f);
-
+            // rb.gameObject.transform.position = new Vector3(player.transform.position.x, player.transform.position.y, player.transform.position.z + 2f);
+            rb.useGravity = true;
             rb.gameObject.GetComponent<Ball>().CreateBallMovement(startPosition, direction, swipeTime);
         }
     }

@@ -1,54 +1,72 @@
+﻿using System;
 using System.Collections;
 using UnityEngine;
 
 public class BallHitDetection : MonoBehaviour
 {
+    public static event Action<BallHitDetection, Collider> OnBallHit;
+    public static event Action<Collider> OnPlayer2Hit;
+    public static event Action<Collider> OnPlayer1Hit;
+    public BallHitDetection ballHit;
     private Rigidbody ballRb;
     private GameObject ballPrefab;
     public float slowdownFactor = 0.7f;
     public LayerMask layerMask;
-   
+
+    public Transform parent;
+    public GameObject player2;
+
+    private void OnEnable()
+    {
+        
+    }
     void Start()
     {
+        parent = transform.parent;
         //layerMask = ~LayerMask.GetMask("Ground");
-       
-
+        ballHit = gameObject.GetComponent<BallHitDetection>();
     }
-    public bool OnTriggerEnter(Collider other)
+   
+    public void OnTriggerEnter(Collider collider)
     {
-        ballPrefab = GameObject.FindGameObjectWithTag("Ball");
-        if (ballPrefab != null)
-        { ballRb = ballPrefab.GetComponent<Rigidbody>(); }
-
-        if (ballRb == null || !other.gameObject.CompareTag("Ball"))
+        Debug.Log("Name : " + collider.gameObject.name);
+        if (collider.gameObject.name == "Ball")
         {
-            Debug.Log(other.gameObject.ToString());
-            return false;
+           // Rigidbody ballRb = collider.gameObject.GetComponent<Rigidbody>();
+
+            Debug.Log("Name : " + parent.gameObject.name);
+            if (parent.gameObject.name == "Player2")
+            {
+                Debug.Log(collider.gameObject.name.ToString());
+                OnPlayer2Hit?.Invoke(collider);
+            }
+            else if (parent.gameObject.name == "Player1")
+            {
+                GameManager.isPlayerOneServing = true;
+                Player1Hit(collider);
+                    OnBallHit?.Invoke(ballHit, collider); 
+                Debug.Log("Name : " + parent.gameObject.name);
+
+            }
+            //Debug.Log(collider.gameObject.name); return true;
         }
-        else
-            //// Get velocity direction
-            //Vector3 ballDirection = ballRb.linearVelocity.normalized;
-            //// Calculate direction FROM BALL TO PLAYER(collider)
-            //Vector3 directionToPlayer = (transform.position - ballPrefab.transform.position).normalized;
-            ////  directions
-            //float dot = Vector3.Dot(ballDirection, directionToPlayer);
-
-
-            ////Ball is moving toward the player
-            //if (dot > 0)
-            //{
-            //   Debug.Log("Dot product: " + dot);
-            //   StartCoroutine(SlowBall(ballRb, 0.5f,3f));
-
-
-            //   Debug.Log("Ball is moving toward the player");
-
-            //}
-            //else
-            //{
-            //    Debug.Log("Ball is moving away from the player");
-            //}
-            Debug.Log(other.gameObject.name); return true;
+    }
+    private void OnTriggerExit(Collider collider)
+    {
+        if (collider.gameObject.name == "Ball"){
+            if (parent.gameObject.name == "Player1")
+            {
+                GameManager.isPlayerOneServing = false;
+            }
+        }
+    }
+    public bool Player1Hit(Collider collider)
+    {
+        if(collider.gameObject.name == "Ball")
+        {
+            return true;
+        }
+        return false;
     }
     public IEnumerator SlowBall(Rigidbody rb, float slowFactor, float duration)
     {
