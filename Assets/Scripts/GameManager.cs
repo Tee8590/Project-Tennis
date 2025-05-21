@@ -37,6 +37,14 @@ public class GameManager : MonoBehaviour
         SwipeControl.OnSwipe -= HandleSwipesRotation;
         BallHitDetection.OnPlayer2Hit += OpponentPlayer;
     }
+    private Transform Player1Position;
+    private Transform Player2Position;
+    private Transform player1BallPosition;
+    private Transform player2BallPosition;
+    private void Start()
+    {
+        
+    }
     private void HandleSwipesRotation(SwipeControl control)
     {
        
@@ -52,6 +60,7 @@ public class GameManager : MonoBehaviour
         ballRb.AddForce(enemy * 3f, ForceMode.Impulse);
         isPlayerOneServing = false;
 
+
     }
    
     private void HandleServeRotation(BallHitDetection detection, Collider collider)
@@ -59,7 +68,9 @@ public class GameManager : MonoBehaviour
         
         
     }
-
+    private int serveCount = 1;         
+    private bool isBallInPlay = false;  
+    private bool serverIsRightSide = true;
     void HandleZoneHit(CourtZoneType zoneType, Collision collition)
     {
        // Debug.Log($"Ball hit zone: {zoneType}");
@@ -67,22 +78,48 @@ public class GameManager : MonoBehaviour
         {
             case CourtZoneType.LeftServiceBox:
                 Debug.Log("LeftServiceBox Valid serve zone");
-                // TODO: Check serve legality, update serve count, rotate server if needed
+                // Ball landed in left service box (typically for a serve from right side).
+                if (!CheckServeLegality(zoneType))
+                {
+                    // Serve fault: update serve count and check for double fault.
+                    UpdateServeCount();
+                    if (serveCount > 2)
+                    {
+                        // Double fault: opponent wins the point.
+                        AwardPointToOpponent();
+                        ResetServeCount();
+                        SwitchServer();
+                    }
+                    // If first serve fault, wait for second serve (no point yet).
+                }
+                else
+                {
+                    // Valid serve: reset serve count and start rally.
+                    ResetServeCount();
+                    isBallInPlay = true;
+                }
                 break;
 
             case CourtZoneType.Net:
                 Debug.Log("Ball hit the net - fault or let");
-                // TODO: Apply fault or let logic
+                // Ball hit the net: fault or point for opponent.
+                AwardPointToOpponent();
+                ResetServeCount();
+                SwitchServer();
                 break;
 
             case CourtZoneType.Baseline:
                 Debug.Log("Ball hit baseline - checking if in or out");
-                // TODO: Determine if ballPrefab was in bounds
+                // Ball landed beyond the baseline (out-of-bounds): point to opponent.
+                AwardPointToOpponent();
+                SwitchServer();
                 break;
 
             case CourtZoneType.Sideline:
                 Debug.Log("Ball hit sideline - checking for out call");
-                // TODO: Determine if ballPrefab is out
+                // Ball landed beyond the sidelines (out-of-bounds): point to opponent.
+                AwardPointToOpponent();
+                SwitchServer();
                 break;
 
             case CourtZoneType.Backcourt:
@@ -95,16 +132,58 @@ public class GameManager : MonoBehaviour
 
             case CourtZoneType.RightServiceBox:
                 Debug.Log("RightServiceBox Valid serve zone");
-                AwardPointToCurrentPlayer();
-                SwitchServer();
-                // TODO: Check if serve was legal
+                // Ball landed in right service box (typically for a serve from left side).
+                if (!CheckServeLegality(zoneType))
+                {
+                    // Serve fault: increment serve count and check for double fault.
+                    UpdateServeCount();
+                    if (serveCount > 2)
+                    {
+                        // Double fault: opponent wins the point.
+                        AwardPointToOpponent();
+                        ResetServeCount();
+                        SwitchServer();
+                    }
+                }
+                else
+                {
+                    // Valid serve: reset serve count and start rally.
+                    ResetServeCount();
+                    isBallInPlay = true;
+                }
                 break;
             case CourtZoneType.None:
-                Debug.Log("None");
+            default:
+                // Ball did not hit any recognized zone: treat as out-of-bounds.
+                AwardPointToOpponent();
+                SwitchServer();
                 break;
         }
         UpdateUI();
     }
+    // Stub: Check if the serve landed in the correct service box.
+    private bool CheckServeLegality(CourtZoneType zoneType)
+    {
+        // Example logic: if server is on right side, serve must go to left service box, and vice versa.
+        if (serverIsRightSide && zoneType == CourtZoneType.LeftServiceBox) return true;
+        if (!serverIsRightSide && zoneType == CourtZoneType.RightServiceBox) return true;
+        return false;
+    }
+    private void SwitchServer()
+    {
+        serverIsRightSide = !serverIsRightSide;
+        isBallInPlay = false;
+        Debug.Log("Server switched");
+    }
+    private void ResetServeCount()
+    {
+        serveCount = 1;
+    }
+    private void UpdateServeCount()
+    {
+        serveCount++;
+    }
+
     void AwardPointToCurrentPlayer()
     {
         if (isPlayerOneServing)
@@ -123,11 +202,6 @@ public class GameManager : MonoBehaviour
             playerOneScore++;
 
         //Debug.Log($"Score - Player1SwingAction 1: {playerOneScore}, Player1SwingAction 2: {playerTwoScore}");
-    }
-    private void SwitchServer()
-    {
-        isPlayerOneServing = !isPlayerOneServing;
-        //Debug.Log($"Server switched. Now it's {(isPlayerOneServing ? "Player1SwingAction 1" : "Player1SwingAction 2")}'s serve.");
     }
     private void UpdateUI()
     {

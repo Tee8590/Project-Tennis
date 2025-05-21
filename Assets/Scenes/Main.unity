@@ -398,6 +398,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   zoneType: 4
   hasCollided: 0
+  trailBallPrefab: {fileID: 184456016028874178, guid: 49f472a49b75c454e8b0f3c0735ec2d4, type: 3}
 --- !u!54 &157318684
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1528,6 +1529,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   zoneType: 6
   hasCollided: 0
+  trailBallPrefab: {fileID: 184456016028874178, guid: 49f472a49b75c454e8b0f3c0735ec2d4, type: 3}
 --- !u!54 &829930281
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1833,6 +1835,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   zoneType: 1
   hasCollided: 0
+  trailBallPrefab: {fileID: 184456016028874178, guid: 49f472a49b75c454e8b0f3c0735ec2d4, type: 3}
 --- !u!54 &983575105
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2440,6 +2443,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   zoneType: 2
   hasCollided: 0
+  trailBallPrefab: {fileID: 184456016028874178, guid: 49f472a49b75c454e8b0f3c0735ec2d4, type: 3}
 --- !u!54 &1214356355
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2589,6 +2593,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   zoneType: 5
   hasCollided: 0
+  trailBallPrefab: {fileID: 184456016028874178, guid: 49f472a49b75c454e8b0f3c0735ec2d4, type: 3}
 --- !u!54 &1274049880
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2871,6 +2876,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   zoneType: 4
   hasCollided: 0
+  trailBallPrefab: {fileID: 184456016028874178, guid: 49f472a49b75c454e8b0f3c0735ec2d4, type: 3}
 --- !u!54 &1487527347
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3652,6 +3658,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   zoneType: 5
   hasCollided: 0
+  trailBallPrefab: {fileID: 184456016028874178, guid: 49f472a49b75c454e8b0f3c0735ec2d4, type: 3}
 --- !u!54 &1882873817
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3938,6 +3945,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   zoneType: 3
   hasCollided: 0
+  trailBallPrefab: {fileID: 0}
 --- !u!1 &2003526430
 GameObject:
   m_ObjectHideFlags: 0

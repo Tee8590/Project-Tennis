@@ -149,10 +149,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 394d289620b88f447b00181b6bb12475, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 13.96
-  maxSpeed: 14.48
+  speed: 14.03
+  maxSpeed: 14.03
   ballSpawnPoint: {fileID: 0}
   launchDirection: {x: 0, y: 0, z: 1}
   launchForce: 0
+  trailBallPrefab: {fileID: 184456016028874178, guid: 49f472a49b75c454e8b0f3c0735ec2d4, type: 3}
   noOfPoints: 0
   timeStep: 0

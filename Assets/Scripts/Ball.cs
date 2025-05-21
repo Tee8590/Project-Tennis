@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 public class Ball : MonoBehaviour
 {
@@ -13,13 +14,13 @@ public class Ball : MonoBehaviour
     [SerializeField]
     public Transform ballSpawnPoint;
     public Vector3 launchDirection = Vector3.forward;
-    public float launchForce ;
-    public int noOfPoints; // Number of points drawn
-    public float timeStep; // Time between each point
+    public float launchForce;
+    //public int noOfPoints; // Number of points drawn
+    //public float timeStep; // Time between each point
 
     void Start()
     {
-
+        ballSpawnPoint = gameObject.transform;
         rb = GetComponent<Rigidbody>();
         //rb.AddForce(-Vector3.forward * 50f * Time.deltaTime, ForceMode.Impulse);
     }
@@ -30,22 +31,31 @@ public class Ball : MonoBehaviour
     }
     public void CreateBallMovement(Vector3 startPoint, Vector3 direction, float swipeTime)
     {
-        direction = new Vector3(direction.x, direction.y, direction.y*2);
+      Vector3  ogDirection = new Vector3(direction.x, direction.y, direction.y * 2);
         rb = GetComponent<Rigidbody>();
         speed += swipeTime * 10;
 
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-        rb.AddForce(direction * speed * Time.deltaTime, ForceMode.Impulse);
+        //SimulatedBallTrajectory(startPoint, direction, speed);
+
+
+        rb.AddForce(ogDirection * speed * Time.deltaTime, ForceMode.Impulse);
         //Debug.Log($"velocity: " + rb.linearVelocity + " direction: " + direction.normalized + " swipeTime: " + swipeTime);
+        //
+        Vector3 ballDir = new Vector3(direction.x, direction.y, direction.y);
+        Vector3 velocity = ballDir.normalized * speed;
+
+        CalculateLandingPoint(startPoint, velocity, 18.24f);
+
         SpeedControl();
     }
-    
+
     public void SpeedControl()
     {
         Vector3 ballVel = new Vector3(rb.linearVelocity.x, rb.linearVelocity.y, rb.linearVelocity.z);
-       
-        if(ballVel.magnitude > maxSpeed)
+
+        if (ballVel.magnitude > maxSpeed)
         {
             speed = maxSpeed;
             Vector3 limitBallVel = ballVel.normalized * speed;
@@ -53,29 +63,50 @@ public class Ball : MonoBehaviour
         }
 
     }
-    void SimulatedBallTrajectory(Vector3 startPoint, Vector3 launchDirection, float speed)
+
+    public GameObject trailBallPrefab; // Prefab with Rigidbody and Trail Renderer
+    public int noOfPoints = 50;
+    public float timeStep = 0.1f;
+
+    private Vector3 CalculateLandingPoint(Vector3 startPos, Vector3 startVelocity, float groundY)
     {
-          ballSpawnPoint.position = startPoint;
-       if(ballSpawnPoint == null) return;
+        // Decompose initial conditions
+        float y0 = startPos.y;                  // start height
+        float vy = startVelocity.y;             // initial vertical velocity
+        Vector3 vHorizontal = new Vector3(startVelocity.x, 0, startVelocity.z);
 
-        launchForce = speed / rb.mass;
-        Vector3 startPos = ballSpawnPoint.position;
-        Vector3 velocity = launchDirection.normalized * launchForce;
-        
-        Vector3 prevPoint = startPos;
-        for(int i =0; i <= noOfPoints; i++)
+        // Use Physics.gravity for g (negative value, e.g. -9.81)
+        float g = Physics.gravity.y;
+        float a = 0.5f * g;
+        float b = vy;
+        float c = y0 - groundY;
+
+        // Solve quadratic a*t^2 + b*t + c = 0 for time t
+        float discriminant = b * b - 4f * a * c;
+        if (discriminant < 0f)
         {
-            float t = i * timeStep;
-            Vector3 gravity = Physics.gravity;
-
-            //ProjectileMotion
-            //P(t) =                V₀       ·t + ½    ·g          ·t²
-            Vector3 displacement = velocity * t + 0.5f * gravity * t * t;
-            Vector3 point = startPos + displacement;
-
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawLine(prevPoint, point);
-            prevPoint = point;
+            // No real solution: does not hit the plane
+            return Vector3.zero;
         }
+        float sqrtDisc = Mathf.Sqrt(discriminant);
+        float t1 = (-b + sqrtDisc) / (2f * a);
+        float t2 = (-b - sqrtDisc) / (2f * a);
+        // Choose the positive (future) time
+        float t = Mathf.Max(t1, t2);
+        if (t < 0f)
+        {
+            // Both times negative: impact is in the past
+            return Vector3.zero;
+        }
+
+        // Calculate impact position using P = start + v*t + 0.5*g*t^2
+        Vector3 landingPos = startPos
+                            + startVelocity * t
+                            + 0.5f * Physics.gravity * t * t;
+        // Ensure Y is exactly groundY (prevent tiny float errors)
+        landingPos.y = groundY;
+        Instantiate(trailBallPrefab, landingPos, Quaternion.identity);
+        Debug.Log("landingPos"+landingPos);
+        return landingPos;
     }
 }
