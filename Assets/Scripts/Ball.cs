@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class Ball : MonoBehaviour
 {
+    public static event Action<Vector3> OnBallLandingPoint;
     Rigidbody rb;
     //[SerializeField]
     //private float speedThreshold = 10f;
@@ -17,6 +19,12 @@ public class Ball : MonoBehaviour
     public float launchForce;
     //public int noOfPoints; // Number of points drawn
     //public float timeStep; // Time between each point
+
+
+    public GameObject trailBallPrefab; // Prefab with Rigidbody and Trail Renderer
+    public int noOfPoints = 50;
+    public float timeStep = 0.1f;
+
 
     void Start()
     {
@@ -37,18 +45,18 @@ public class Ball : MonoBehaviour
 
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-        //SimulatedBallTrajectory(startPoint, direction, speed);
 
+        rb.AddForce(ogDirection * speed , ForceMode.Impulse);
+       
+        SpeedControl();
+        Vector3 ballDir = new Vector3(ogDirection.x, ogDirection.y, ogDirection.z);
 
-        rb.AddForce(ogDirection * speed * Time.deltaTime, ForceMode.Impulse);
-        //Debug.Log($"velocity: " + rb.linearVelocity + " direction: " + direction.normalized + " swipeTime: " + swipeTime);
-        //
-        Vector3 ballDir = new Vector3(direction.x, direction.y, direction.y);
         Vector3 velocity = ballDir.normalized * speed;
+       
 
         CalculateLandingPoint(startPoint, velocity, 18.24f);
-
-        SpeedControl();
+        
+       
     }
 
     public void SpeedControl()
@@ -64,10 +72,6 @@ public class Ball : MonoBehaviour
 
     }
 
-    public GameObject trailBallPrefab; // Prefab with Rigidbody and Trail Renderer
-    public int noOfPoints = 50;
-    public float timeStep = 0.1f;
-
     private Vector3 CalculateLandingPoint(Vector3 startPos, Vector3 startVelocity, float groundY)
     {
         // Decompose initial conditions
@@ -82,7 +86,10 @@ public class Ball : MonoBehaviour
         float c = y0 - groundY;
 
         // Solve quadratic a*t^2 + b*t + c = 0 for time t
-        float discriminant = b * b - 4f * a * c;
+        float discriminant = Mathf.Abs(b * b - 4f * a * c);
+
+        Debug.Log("discriminant"+discriminant);
+
         if (discriminant < 0f)
         {
             // No real solution: does not hit the plane
@@ -107,6 +114,7 @@ public class Ball : MonoBehaviour
         landingPos.y = groundY;
         Instantiate(trailBallPrefab, landingPos, Quaternion.identity);
         Debug.Log("landingPos"+landingPos);
+        OnBallLandingPoint?.Invoke(landingPos);
         return landingPos;
     }
 }

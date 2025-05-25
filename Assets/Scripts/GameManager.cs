@@ -28,14 +28,16 @@ public class GameManager : MonoBehaviour
         BallHitDetection.OnBallHit   += HandleServeRotation;
         SwipeControl.OnSwipe         += HandleSwipesRotation;
         BallHitDetection.OnPlayer2Hit += OpponentPlayer;
-      
+        //Ball.OnBallLandingPoint += CalculateLandingPoint;
+
+
     }
     private void OnDisable()
     {
         CollitionDetection.OnZoneHit -= HandleZoneHit;
         BallHitDetection.OnBallHit -= HandleServeRotation;
         SwipeControl.OnSwipe -= HandleSwipesRotation;
-        BallHitDetection.OnPlayer2Hit += OpponentPlayer;
+        BallHitDetection.OnPlayer2Hit -= OpponentPlayer;
     }
     private Transform Player1Position;
     private Transform Player2Position;

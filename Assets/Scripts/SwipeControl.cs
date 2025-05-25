@@ -33,6 +33,7 @@ public class SwipeControl : MonoBehaviour
     private Coroutine slowBallCoroutine;
     private BallHitDetection ballHitDetection;
     private InputAction fireAction;
+    private GameObject createdBallPrefab= null;
     //[SerializeField]
     //private Camera mainCamera;
     private void OnEnable()
@@ -54,27 +55,15 @@ public class SwipeControl : MonoBehaviour
        ballHitDetection =  player.GetComponentInChildren<BallHitDetection>();
         CreateBall();
     }
+    //necessory?
     public void Player1SwingAction(Collider collider)
     {
         
         ballrb = collider.GetComponent<Rigidbody>();
     }
-    //private float ComputeZDepth(float planeY = 0f)
-    //{
-    //    float camY = mainCamera.transform.position.y;
-    //    float forwardY = mainCamera.transform.forward.y;
-    //    // Avoid division by zero
-    //    if (Mathf.Approximately(forwardY, 0f))
-    //        forwardY = 0.0001f;
-    //    return (camY - planeY) / forwardY;
-    //}
+   
     private void SwipeStart(Vector2 position, float time)
-    {/*
-        float zDepth = ComputeZDepth(0f);
-        startPosition = Utils.ScreenToWorld(
-            mainCamera,
-            new Vector3(position.x, position.y, zDepth)
-        );*/
+    {
         startPosition = position;
         startTime = time;
         trail.SetActive(true);
@@ -102,12 +91,7 @@ public class SwipeControl : MonoBehaviour
     }
     private void SwipeEnd(Vector2 position, float time)
     {
-      /*  float zDepth = ComputeZDepth(0f);
-        endPosition = Utils.ScreenToWorld(
-            mainCamera,
-            new Vector3(position.x, position.y, zDepth)
-        );*/
-
+      
         trail.SetActive(false);
         StopCoroutine(coroutine);
         endPosition = position;
@@ -200,18 +184,19 @@ public class SwipeControl : MonoBehaviour
 
     public Rigidbody CreateBall()
     {
-        if (GameObject.FindGameObjectWithTag("Ball") == null)
+        if (createdBallPrefab == null)
         {
-            GameObject ball = Instantiate(ballPrefab);  ball.name = "Ball";
-            ball.transform.position = new Vector3(player.transform.position.x,
-                player.transform.position.y,
-                player.transform.position.z + 2f);
-            ballrb = ball.GetComponent<Rigidbody>();
+            ballPrefab.transform.position = new Vector3(player.transform.position.x,
+               player.transform.position.y,
+               player.transform.position.z + 2f);
+            createdBallPrefab = Instantiate(ballPrefab);  createdBallPrefab.name = "Ball";
+           
+            ballrb = createdBallPrefab.GetComponent<Rigidbody>();
             BallPhysicsOff();
             return ballrb;
         }
         else{
-            ballrb = GameObject.FindGameObjectWithTag("Ball").GetComponent<Rigidbody>();
+            ballrb = createdBallPrefab.GetComponent<Rigidbody>();
             ballrb.transform.position = new Vector3(player.transform.position.x,
                player.transform.position.y,
                player.transform.position.z + 2f);

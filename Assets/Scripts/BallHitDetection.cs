@@ -44,7 +44,7 @@ public class BallHitDetection : MonoBehaviour
             {
                 GameManager.isPlayerOneServing = true;
                 Player1Hit(collider);
-                    OnBallHit?.Invoke(ballHit, collider); 
+                OnPlayer1Hit?.Invoke(collider);
                 Debug.Log("Name : " + parent.gameObject.name);
 
             }
