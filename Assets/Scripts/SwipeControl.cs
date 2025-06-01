@@ -129,7 +129,10 @@ public class SwipeControl : MonoBehaviour
             float swipeTime = (endTime - startTime);
             direction = swipEnd - swipStart;
             direction2D = new Vector2(direction.x, direction.y).normalized;
-            middlePosition = (swipStart + swipEnd) / 2f + Vector2.up * 100f;
+
+            float arcFactor = 0.5f; // Adjust to control arc height (try 0.3 to 0.7)
+            float swipeDistance = Vector2.Distance(startPosition, endPosition);
+            middlePosition = (startPosition + endPosition) / 2f + Vector2.up * swipeDistance * arcFactor;
             Vector3 endPoint = new Vector3(swipEnd.x, swipEnd.y, 0);
             Vector3 midPoint = new Vector3(0, 0, 0);
             SwipeDirection(direction2D);;
@@ -177,19 +180,17 @@ public class SwipeControl : MonoBehaviour
             //direction of the ballPrefab in 2D, z is 0 currently
            direction = endPosition - startPosition;
            direction2D = new Vector2(direction.x, direction.y).normalized;
-           middlePosition = (startPosition + endPosition) / 2f + Vector2.up * 100f;
+
+            float arcFactor = 0.5f; // Adjust to control arc height (try 0.3 to 0.7)
+            float swipeDistance = Vector2.Distance(startPosition, endPosition);
+            middlePosition = (startPosition + endPosition) / 2f + Vector2.up * swipeDistance * arcFactor;
             Debug.Log("middlePosition" + middlePosition);
             //making it endPosition & middlePosition Vector3
             Vector3 endPoint = new Vector3(endPosition.x, endPosition.y, 0);
             Vector3 midPoint = new Vector3(0,0,0);
             SwipeDirection(direction2D);
 
-            /* if(GameManager.isPlayerOneServing)
-             {
-                 CreateBall();
-                 BallMovement(ballrb, direction, swipeTime);
-                 GameManager.isPlayerOneServing = false;
-             }*/
+            
             Ball ballobj= GameObject.Find("Ball").GetComponent<Ball>();
             Rigidbody ballRb = ballobj.GetComponent<Rigidbody>();
             ballRb.useGravity = true;
@@ -304,24 +305,14 @@ public class SwipeControl : MonoBehaviour
         ballrb.angularVelocity = Vector3.zero;
         ballrb.useGravity = false; return ballrb;
     }
-    public void OpponentBallDebug()
-    {
-        if (GameObject.FindGameObjectWithTag("Ball") == null)
-        {
-            Vector3 position = new Vector3(player.transform.position.x, player.transform.position.y, player.transform.position.z + 20f);
-            ballPrefab = Instantiate(ballPrefab, position, Quaternion.identity);
 
-            Rigidbody rb = ballPrefab.GetComponent<Rigidbody>();
-            rb.AddForce(-Vector3.forward * 50f * Time.deltaTime, ForceMode.Impulse);
-        }
-    }
     public IEnumerator MoveAlongPath(GameObject ball, List<Vector3> path, float duration)
     {
         float totalLength = path.Count - 1;
         float elapsed = 0f;
         while (elapsed < duration)
         {
-            // figure out which segment we’re in, and the local t
+            
             float t = elapsed / duration * totalLength;
             int i = Mathf.FloorToInt(t);
             float u = t - i;              // local interpolation between path[i] -> path[i+1]
@@ -357,11 +348,12 @@ public class SwipeControl : MonoBehaviour
     {
         Vector3 start = path[path.Count - 2];
         Vector3 end = path[path.Count - 1];
-        Vector3 direction = end - start;
+        Vector3 direction = (end - start);
 
         ballrb = ball.GetComponent<Rigidbody>();
         ballrb.WakeUp();
-       
+       ballrb.rotation = Quaternion.LookRotation(direction, Vector3.down);
+        Debug.Log("Force direction: " + direction);
         ballrb.AddForce(direction * 8f, ForceMode.Impulse);
         /* Debug.Log("Force direction: " + direction);*/
     }

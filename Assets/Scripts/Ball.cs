@@ -18,11 +18,16 @@ public class Ball : MonoBehaviour
     public float launchForce;
     //public int noOfPoints; // Number of points drawn
     //public float timeStep; // Time between each point
+    public GameObject trailBallPrefab; // Prefab with Rigidbody and Trail Renderer
+    public int noOfPoints = 50;
+    public float timeStep = 0.1f;
     public static event Action<Rigidbody, Vector3, Vector3> BallStartAndEndpositions;
     void Start()
     {
         ballSpawnPoint = gameObject.transform;
         rb = GetComponent<Rigidbody>();
+        trailBallPrefab = Instantiate(trailBallPrefab, new Vector3(999,999,999), Quaternion.AngleAxis(-90, new Vector3(-90, 0, 0)));
+
         //rb.AddForce(-Vector3.forward * 50f * Time.deltaTime, ForceMode.Impulse);
     }
     void FixedUpdate()
@@ -67,9 +72,7 @@ public class Ball : MonoBehaviour
 
     }
 
-    public GameObject trailBallPrefab; // Prefab with Rigidbody and Trail Renderer
-    public int noOfPoints = 50;
-    public float timeStep = 0.1f;
+    
 
     public Vector3 CalculateLandingPoint(Vector3 startPos, Vector3 startVelocity, float groundY)
     {
@@ -117,7 +120,9 @@ public class Ball : MonoBehaviour
         if(lp !=  Vector3.zero)
         {
             Vector3 landingPosSpot = new Vector3(lp.x, lp.y + .02f, lp.z);
-            Instantiate(trailBallPrefab, landingPosSpot, Quaternion.AngleAxis(-90, new Vector3(-90, 0, 0)));
+           // Instantiate(trailBallPrefab, landingPosSpot, Quaternion.AngleAxis(-90, new Vector3(-90, 0, 0)));
+           trailBallPrefab.transform.position = landingPosSpot;
+
             return lp;
         }
         else
