@@ -1,0 +1,2 @@
+C:\UNITY PROJECTS\Backup\Project-Tennis\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\CMakeLists.txt
+C:\UNITY PROJECTS\Backup\Project-Tennis\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\GameActivity\CMakeLists.txt
