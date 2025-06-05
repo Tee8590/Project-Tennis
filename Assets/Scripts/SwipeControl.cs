@@ -43,6 +43,7 @@ public class SwipeControl : MonoBehaviour
     private Vector3 landingPos;
     private Vector2 swipStart;
     private Vector2 swipEnd;
+    private Vector3 target;
     //[SerializeField]
     //private Camera mainCamera;
     private void OnEnable()
@@ -140,7 +141,7 @@ public class SwipeControl : MonoBehaviour
             Ball ballobj = GameObject.Find("Ball").GetComponent<Ball>();
             Rigidbody ballRb = collider.gameObject.GetComponent<Rigidbody>();
             ballRb.useGravity = true;
-            velocity = ballobj.CreateBallVelocity(swipStart, direction, swipeTime);
+            velocity = ballobj.CreateBallVelocity(swipStart, direction, swipeTime, swipeDistance);
             landingPos = ballobj.CalculateLandingPoint(swipStart, velocity, 18.24f);
             landingPos.z = landingPos.z / 6;
             ballobj.BallLandingPositionMarker(landingPos);
@@ -194,7 +195,7 @@ public class SwipeControl : MonoBehaviour
             Ball ballobj= GameObject.Find("Ball").GetComponent<Ball>();
             Rigidbody ballRb = ballobj.GetComponent<Rigidbody>();
             ballRb.useGravity = true;
-            velocity = ballobj.CreateBallVelocity(startPosition, direction, swipeTime);
+            velocity = ballobj.CreateBallVelocity(startPosition, direction, swipeTime, swipeDistance);
             landingPos = ballobj.CalculateLandingPoint(startPosition, velocity, 18.24f);
 
             MakeBallMovement(ballobj.transform.position, middlePosition, landingPos);
@@ -251,7 +252,7 @@ public class SwipeControl : MonoBehaviour
     {
 
         List<Vector3> path = new List<Vector3>();
-        int noOfPoints = 50;
+        int noOfPoints = 30;
 
         float distance2D = Vector2.Distance(start, end);
 
@@ -320,7 +321,10 @@ public class SwipeControl : MonoBehaviour
             Rigidbody rb =ball.GetComponent<Rigidbody>();
             rb.useGravity = true;
             if (i < path.Count - 1)
-                ball.transform.position = Vector3.Lerp(path[i], path[i + 1], u);
+               ball.transform.position = Vector3.Lerp(path[i], path[i + 1], u);
+            /*target = path[i + 1];
+            Vector3 direction = (target - rb.position).normalized;
+            rb.AddForce(direction * t, ForceMode.VelocityChange);*/
 
             elapsed += Time.deltaTime;
             yield return null;
@@ -357,7 +361,7 @@ public class SwipeControl : MonoBehaviour
         ballrb.AddForce(direction * 8f, ForceMode.Impulse);
         /* Debug.Log("Force direction: " + direction);*/
     }
-    public void BallMovement(Rigidbody rb,Vector3 direction, float swipeTime)
+   /* public void BallMovement(Rigidbody rb,Vector3 direction, float swipeTime)
     {
         rb = ballrb;
         if (rb != null)
@@ -368,7 +372,7 @@ public class SwipeControl : MonoBehaviour
             rb.useGravity = true;
             rb.gameObject.GetComponent<Ball>().CreateBallVelocity(startPosition, direction, swipeTime);
         }
-    }
+    }*/
     
     private void SwipeDirection(Vector2 direction)
     {

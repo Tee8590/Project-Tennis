@@ -74,24 +74,19 @@ public class GameManager : MonoBehaviour
     private bool serverIsRightSide = true;
     void HandleZoneHit(CourtZoneType zoneType, Collision collition)
     {
-       // Debug.Log($"Ball hit zone: {zoneType}");
         switch (zoneType)
         {
             case CourtZoneType.LeftServiceBox:
                 Debug.Log("LeftServiceBox Valid serve zone");
-                // Ball landed in left service box (typically for a serve from right side).
                 if (!CheckServeLegality(zoneType))
                 {
-                    // Serve fault: update serve count and check for double fault.
                     UpdateServeCount();
                     if (serveCount > 2)
                     {
-                        // Double fault: opponent wins the point.
                         AwardPointToOpponent();
                         ResetServeCount();
                         SwitchServer();
                     }
-                    // If first serve fault, wait for second serve (no point yet).
                 }
                 else
                 {

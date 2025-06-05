@@ -31,16 +31,18 @@ public class Ball : MonoBehaviour
         //rb.AddForce(-Vector3.forward * 50f * Time.deltaTime, ForceMode.Impulse);
     }
     void FixedUpdate()
-    {
-        SpeedControl();
+    {if(speed>maxSpeed)
+        {
+            SpeedControl();
+        }
 
     }
-    public Vector3 CreateBallVelocity(Vector3 startPoint, Vector3 direction, float swipeTime)
+    public Vector3 CreateBallVelocity(Vector3 startPoint, Vector3 direction, float swipeTime, float swipeDistance)
     {
         Debug.Log("directionvelocity " + direction);
         Vector3  ogDirection = new Vector3(direction.x, direction.y, direction.y * 2);
         rb = GetComponent<Rigidbody>();
-        speed += swipeTime * 10;
+        speed += swipeTime * swipeDistance * 4f;
 
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
