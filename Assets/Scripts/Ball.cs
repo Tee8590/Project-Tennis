@@ -4,11 +4,14 @@ using System;
 
 public class Ball : MonoBehaviour
 {
-    Rigidbody rb;
+    
+    public static Ball Instance;
+   /* public GameObject ballObj = null;*/
+    public Rigidbody ballRb;
     //[SerializeField]
     //private float speedThreshold = 10f;
     [SerializeField]
-    private float speed;
+    public float speed;
     [SerializeField]
     private float maxSpeed;
 
@@ -22,13 +25,36 @@ public class Ball : MonoBehaviour
     public int noOfPoints = 50;
     public float timeStep = 0.1f;
     public static event Action<Rigidbody, Vector3, Vector3> BallStartAndEndpositions;
+
+    private Vector3 ballDirection;
+    private Vector3 directionToPlayer;
+    private float dot;
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject); 
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+        trailBallPrefab = Instantiate(trailBallPrefab, new Vector3(999, 999, 999), Quaternion.AngleAxis(-90, new Vector3(-90, 0, 0)));
+
+    }
+
     void Start()
     {
+        /*if(ballObj == null)
+        {
+            ballObj = Instantiate(gameObject); ballObj.name = "Ball";
+            ballRb = ballObj.GetComponent<Rigidbody>();
+        }*/
         ballSpawnPoint = gameObject.transform;
-        rb = GetComponent<Rigidbody>();
-        trailBallPrefab = Instantiate(trailBallPrefab, new Vector3(999,999,999), Quaternion.AngleAxis(-90, new Vector3(-90, 0, 0)));
-
-        //rb.AddForce(-Vector3.forward * 50f * Time.deltaTime, ForceMode.Impulse);
+        
+       
+        //ballRb.AddForce(-Vector3.forward * 50f * Time.deltaTime, ForceMode.Impulse);
     }
     void FixedUpdate()
     {if(speed>maxSpeed)
@@ -37,39 +63,56 @@ public class Ball : MonoBehaviour
         }
 
     }
+    public float BallDirection()
+    {
+         ballDirection = ballRb.linearVelocity.normalized;
+         directionToPlayer = (transform.position - transform.position).normalized;// cant take the player position p=p=p[=p=[
+         dot = Vector3.Dot(ballDirection, directionToPlayer);
+       
+        ////Ball is moving toward the player
+        if (dot > 0)
+        {
+            return dot;
+            //Debug.Log("Ball is moving toward the player");
+        }
+        else if (dot < 0)
+        {
+            // Debug.Log("Ball is moving away from the player");
+            return dot;
+        }
+        else
+            return 0;
+    }
     public Vector3 CreateBallVelocity(Vector3 startPoint, Vector3 direction, float swipeTime, float swipeDistance)
     {
         Debug.Log("directionvelocity " + direction);
         Vector3  ogDirection = new Vector3(direction.x, direction.y, direction.y * 2);
-        rb = GetComponent<Rigidbody>();
+        ballRb = GetComponent<Rigidbody>();
         speed += swipeTime * swipeDistance * 4f;
 
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-        //SimulatedBallTrajectory(startPoint, direction, speed);
-
-        //Debug.Log($"velocity: " + rb.linearVelocity + " direction: " + direction.normalized + " swipeTime: " + swipeTime);
-      
+        ballRb.linearVelocity = Vector3.zero;
+        ballRb.angularVelocity = Vector3.zero;
+     
         Vector3 ballDir = new Vector3(ogDirection.x, ogDirection.y, ogDirection.z);
         Vector3 velocity = ogDirection.normalized * speed ;
 
         //CalculateLandingPoint(startPoint, velocity, 18.24f);
-        /*rb.AddForce(velocity, ForceMode.Impulse);*/
+        /*ballRb.AddForce(velocity, ForceMode.Impulse);*/
       /*  Debug.Log("velocity " + velocity);*/
-       // BallStartAndEndpositions?.Invoke(rb, startPoint, CalculateLandingPoint(startPoint, velocity, 18.24f));
+       // BallStartAndEndpositions?.Invoke(ballRb, startPoint, CalculateLandingPoint(startPoint, velocity, 18.24f));
         //SpeedControl();
         return velocity;
     }
 
     public void SpeedControl()
     {
-        Vector3 ballVel = new Vector3(rb.linearVelocity.x, rb.linearVelocity.y, rb.linearVelocity.z);
+        Vector3 ballVel = new Vector3(ballRb.linearVelocity.x, ballRb.linearVelocity.y, ballRb.linearVelocity.z);
 
         if (ballVel.magnitude > maxSpeed)
         {
             speed = maxSpeed;
             Vector3 limitBallVel = ballVel.normalized * speed;
-            rb.linearVelocity = new Vector3(limitBallVel.x, limitBallVel.y, limitBallVel.z);
+            ballRb.linearVelocity = new Vector3(limitBallVel.x, limitBallVel.y, limitBallVel.z);
         }
 
     }

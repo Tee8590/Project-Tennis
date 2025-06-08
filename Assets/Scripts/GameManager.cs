@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public enum CourtZoneType
 {
@@ -44,6 +45,14 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         
+    }
+    public void Restart()
+    {
+        SceneManager.LoadScene(0);
+    }
+    public void Quit()
+    {
+        Application.Quit();
     }
     private void HandleSwipesRotation(SwipeControl control)
     {

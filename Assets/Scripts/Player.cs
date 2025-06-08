@@ -36,11 +36,9 @@ public class Player : MonoBehaviour
     public void StartFollowTheBall()
     {
       if(ballRb != null)  
-      {  //// Get velocity direction
+      {  
        Vector3 ballDirection = ballRb.linearVelocity.normalized;
-        //// Calculate direction FROM BALL TO PLAYER(collider)
         Vector3 directionToPlayer = (transform.position - ball.transform.position).normalized;
-        ////  directions
         float dot = Vector3.Dot(ballDirection, directionToPlayer);
 
             ////Ball is moving toward the player
