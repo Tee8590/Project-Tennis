@@ -16,8 +16,8 @@ public class CollitionDetection : MonoBehaviour
             {
                 Vector3 position = contact.point;
                 //GameObject trailBallPrefab = GameObject.Find("BallTrail");
-                Instantiate(trailBallPrefab, position, Quaternion.identity);
-                trailBallPrefab.GetComponent<TrailRenderer>().endColor = Color.green;
+               /* Instantiate(trailBallPrefab, position, Quaternion.identity);
+                trailBallPrefab.GetComponent<TrailRenderer>().endColor = Color.green;*/
                 Debug.Log(position);
             }
             if (!hasCollided)
