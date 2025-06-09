@@ -86,9 +86,9 @@ public class Ball : MonoBehaviour
     public Vector3 CreateBallVelocity(Vector3 startPoint, Vector3 direction, float swipeTime, float swipeDistance)
     {
         Debug.Log("directionvelocity " + direction);
-        Vector3  ogDirection = new Vector3(direction.x, direction.y, direction.y * 2);
+        Vector3  ogDirection = new Vector3(direction.x, direction.y, direction.y * 2f);
         ballRb = GetComponent<Rigidbody>();
-        speed += swipeTime * swipeDistance * 4f;
+        //speed += swipeTime * swipeDistance * 4f;
 
         ballRb.linearVelocity = Vector3.zero;
         ballRb.angularVelocity = Vector3.zero;

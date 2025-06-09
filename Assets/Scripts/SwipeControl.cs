@@ -48,12 +48,13 @@ public class SwipeControl : MonoBehaviour
     private float swipeTime;
 
     private Vector3 direction;
-    private Vector2 middlePosition;
+    private Vector3 middlePosition;
     private Vector3 velocity;
     private Vector3 landingPos;
     private Vector2 swipStart;
     private Vector2 swipEnd;
     private Vector3 target;
+    private float swipeDistance;
     //[SerializeField]
     //private Camera mainCamera;
     private void OnEnable()
@@ -134,21 +135,15 @@ public class SwipeControl : MonoBehaviour
             direction = swipEnd - swipStart;
             direction2D = new Vector2(direction.x, direction.y).normalized;
 
-            float arcFactor = 8.5f; //  control arc height 
-            float swipeDistance = Vector2.Distance(startPosition, endPosition);
-            middlePosition = (startPosition + endPosition) / 2f + Vector2.up * swipeDistance * arcFactor;
-            Vector3 endPoint = new Vector3(swipEnd.x, swipEnd.y, 0);
-            Vector3 midPoint = new Vector3(0, 0, 0);
-            SwipeDirection(direction2D);;
+           
+           //  swipeDistance = Vector2.Distance(startPosition, endPosition);
 
-            Ball ballobj = GameObject.Find("Ball").GetComponent<Ball>();
-            Rigidbody ballRb = collider.gameObject.GetComponent<Rigidbody>();
-            ballRb.useGravity = true;
-            velocity = ballobj.CreateBallVelocity(swipStart, direction, swipeTime, swipeDistance);
-            landingPos = ballobj.CalculateLandingPoint(swipStart, velocity, 18.24f);
-            landingPos.z = landingPos.z / 6;
-            ballobj.BallLandingPositionMarker(landingPos);
-            MakeBallMovement(ballobj.transform.position, middlePosition, landingPos);
+            Ball.Instance.ballRb.useGravity = true;
+            velocity = Ball.Instance.CreateBallVelocity(swipStart, direction, swipeTime, swipeDistance);
+            landingPos = Ball.Instance.CalculateLandingPoint(swipStart, velocity, 18.24f);
+            landingPos.z = landingPos.z / 8;
+            Ball.Instance.BallLandingPositionMarker(landingPos);
+            MakeBallMovement(Ball.Instance.transform.position,  landingPos);
         }
     }
    
@@ -161,21 +156,16 @@ public class SwipeControl : MonoBehaviour
             swipEnd = endPosition;
             //direction of the ballPrefab in 2D, z is 0 currently
            direction = endPosition - startPosition;
-           direction2D = new Vector2(direction.x, direction.y).normalized;
+          // direction2D = new Vector2(direction.x, direction.y).normalized;
 
-            float arcFactor = 8.5f; // Adjust to control arc height (try 0.3 to 0.7)
-            float swipeDistance = Vector2.Distance(startPosition, endPosition);
-            middlePosition = (startPosition + endPosition) / 2f + Vector2.up * swipeDistance * arcFactor;
-            Debug.Log("middlePosition" + middlePosition);
-            //making it endPosition & middlePosition Vector3
-            Vector3 endPoint = new Vector3(endPosition.x, endPosition.y, 0);
-            Vector3 midPoint = new Vector3(0,0,0);
-           
+            swipeDistance = Vector2.Distance(startPosition, endPosition);
+            SwipeDirection(direction2D); 
+
             //ballRb.useGravity = true;
             velocity = Ball.Instance.CreateBallVelocity(startPosition, direction, swipeTime, swipeDistance);
             landingPos = Ball.Instance.CalculateLandingPoint(startPosition, velocity, 18.24f);
 
-            MakeBallMovement(Ball.Instance.transform.position, middlePosition, landingPos);
+            MakeBallMovement(Ball.Instance.transform.position,  landingPos);
            
             return true;
         }
@@ -184,24 +174,24 @@ public class SwipeControl : MonoBehaviour
             return false; 
         }
     }
-    public void MakeBallMovement( Vector3 startPoint, Vector3 middle,  Vector3 landingPoint)
+    public void MakeBallMovement( Vector3 startPoint,   Vector3 landingPoint)
     {
         /* swipeTime = (endTime - startTime);
         //direction of the ballPrefab in 2D, z is 0 currently
         direction = endPosition - startPosition;*/
-        direction2D = new Vector2(direction.x, direction.y).normalized;
+      //  direction2D = new Vector2(direction.x, direction.y).normalized;
         if (GameManager.isPlayerOneServing)
         {
             //CreateBall();
             // BallMovement(ballrb, direction, swipeTime);
-            DrawQuadraticBezierPoint(startPoint, middle, landingPoint);
+            DrawQuadraticBezierPoint(startPoint,  landingPoint);
             GameManager.isPlayerOneServing = false;
         }
         if (!GameManager.isPlayerOneServing)
         {
             //CreateBall();
             // BallMovement(ballrb, direction, swipeTime);
-            DrawQuadraticBezierPoint(startPoint, middle, landingPoint);
+            DrawQuadraticBezierPoint(startPoint,  landingPoint);
             GameManager.isPlayerOneServing = true;
         }
        
@@ -218,21 +208,24 @@ public class SwipeControl : MonoBehaviour
 
     //}
 
-    public void DrawQuadraticBezierPoint(Vector3 start, Vector3 middle, Vector3 end)
+    public void DrawQuadraticBezierPoint(Vector3 start, Vector3 end)
     {
 
        List<Vector3> path = new List<Vector3>();
         int noOfPoints = 40;
 
         float distance2D = Vector2.Distance(start, end);
-
-        middle = (start + end) /2f + Vector3.up * distance2D;
+        float arcFactor = 0.7f; //  control arc height 
+        float swipeDistance = Vector2.Distance(startPosition, endPosition);
+       
+        middlePosition = (start + end)  / 2f + Vector3.up * swipeDistance * arcFactor;
+         Debug.Log("middlePosition" + middlePosition);
         for (int i = 0; i <= noOfPoints; i++)
         {
             float t = i / (float)noOfPoints;
 
             //Vector3 point
-            path.Add(CalculateQuadraticBezierPoint(start, middle, end, t));
+            path.Add(CalculateQuadraticBezierPoint(start, middlePosition, end, t));
 
         }
         for (int i = 1; i < path.Count; i++)
@@ -251,8 +244,8 @@ public class SwipeControl : MonoBehaviour
         {
             Debug.Log("ballPrefab is  null");
             ballPrefab.transform.position = new Vector3(player.transform.position.x,
-                player.transform.position.y +2f,
-                player.transform.position.z + 2f);
+                player.transform.position.y +1f,
+                player.transform.position.z + -0.1f);
             ballPrefab = Instantiate(ballPrefab); ballPrefab.name = "Ball";
 
             ballrb = ballPrefab.GetComponent<Rigidbody>();
@@ -338,6 +331,9 @@ public class SwipeControl : MonoBehaviour
     }*/
     public IEnumerator MoveAlongPath(GameObject ball, List<Vector3> path, float duration)
     {
+        Rigidbody rb = Ball.Instance.ballRb;
+        rb.useGravity = true;
+
         float totalLength = path.Count - 1;
         float elapsed = 0f;
         while (elapsed < duration)
@@ -347,8 +343,7 @@ public class SwipeControl : MonoBehaviour
             int i = Mathf.FloorToInt(t);
             float u = t - i;              // local interpolation between path[i] -> path[i+1]
 
-            Rigidbody rb = Ball.Instance.ballRb;
-            rb.useGravity = true;
+           
             if (i < path.Count - 1)
                   rb.MovePosition(Vector3.Lerp(path[i], path[i + 1], u));
             //    target = path[i + 1];
@@ -359,7 +354,7 @@ public class SwipeControl : MonoBehaviour
             yield return new WaitForFixedUpdate(); ;
         }
 
-        AddForceAtTheEnd(path, ball);
+        AddForceAtTheEnd(path);
 
     }
     private Vector3 CalculateQuadraticBezierPoint(Vector3 p0, Vector3 p1, Vector3 p2, float t)
@@ -377,18 +372,18 @@ public class SwipeControl : MonoBehaviour
         //point.z = point.z * t; //adding the z axis for depth
         return points;
     }
-    public void AddForceAtTheEnd(List<Vector3> path, GameObject ball)
+    public void AddForceAtTheEnd(List<Vector3> path)
     {
-        Vector3 start = path[path.Count - 15];
-        Vector3 end = path[path.Count - 10];
-        Vector3 ballPos = ball.transform.position;
+        Vector3 start = path[path.Count - 10];
+        Vector3 end = path[path.Count - 1];
+        Vector3 ballPos = Ball.Instance.transform.position;
        Vector3 direction = (end - start);
         //  Vector3 direction = ballPrefab.transform.LookAt(ballPos, Vector3.forward ); //addforce tryed but stil shit
 
         Ball.Instance.ballRb.WakeUp();
       // Ball.Instance.ballRb.rotation = Quaternion.LookRotation(direction, Vector3.down);
         Debug.Log("Force direction: " + direction);
-        Ball.Instance.ballRb.AddForce(direction * 8f, ForceMode.VelocityChange);
+        Ball.Instance.ballRb.AddForce(direction * 4f, ForceMode.VelocityChange);
         /* Debug.Log("Force direction: " + direction);*/
     }
    /* public void BallMovement(Rigidbody ballRb,Vector3 direction, float swipeTime)
