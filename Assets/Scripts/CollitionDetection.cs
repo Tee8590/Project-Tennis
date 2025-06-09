@@ -18,7 +18,7 @@ public class CollitionDetection : MonoBehaviour
                 //GameObject trailBallPrefab = GameObject.Find("BallTrail");
                /* Instantiate(trailBallPrefab, position, Quaternion.identity);
                 trailBallPrefab.GetComponent<TrailRenderer>().endColor = Color.green;*/
-                Debug.Log(position);
+                Debug.Log(position+ "contact.point---"+ collision.gameObject.name);
             }
             if (!hasCollided)
             {
