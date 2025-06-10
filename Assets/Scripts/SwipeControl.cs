@@ -341,15 +341,10 @@ public class SwipeControl : MonoBehaviour
 
             float t = elapsed / duration * totalLength;
             int i = Mathf.FloorToInt(t);
-            float u = t - i;              // local interpolation between path[i] -> path[i+1]
-
-           
+            float u = t - i;             
             if (i < path.Count - 1)
                   rb.MovePosition(Vector3.Lerp(path[i], path[i + 1], u));
-            //    target = path[i + 1];
-            //Vector3 direction = (target - rb.position).normalized;
-            //rb.AddForce(direction * 2, ForceMode.VelocityChange);
-
+           
             elapsed += Time.deltaTime;
             yield return new WaitForFixedUpdate(); ;
         }
@@ -374,17 +369,17 @@ public class SwipeControl : MonoBehaviour
     }
     public void AddForceAtTheEnd(List<Vector3> path)
     {
-        Vector3 start = path[path.Count - 10];
-        Vector3 end = path[path.Count - 1];
+        Vector3 start = path[path.Count - 15];
+        Vector3 end = path[path.Count - 10];
         Vector3 ballPos = Ball.Instance.transform.position;
        Vector3 direction = (end - start);
         //  Vector3 direction = ballPrefab.transform.LookAt(ballPos, Vector3.forward ); //addforce tryed but stil shit
-
-        Ball.Instance.ballRb.WakeUp();
-      // Ball.Instance.ballRb.rotation = Quaternion.LookRotation(direction, Vector3.down);
+        
+       // Ball.Instance.ballRb.WakeUp();
         Debug.Log("Force direction: " + direction);
         Ball.Instance.ballRb.AddForce(direction * 4f, ForceMode.VelocityChange);
         /* Debug.Log("Force direction: " + direction);*/
+
     }
    /* public void BallMovement(Rigidbody ballRb,Vector3 direction, float swipeTime)
     {
