@@ -29,7 +29,7 @@ public class BallHitDetection : MonoBehaviour
    
     public void OnTriggerEnter(Collider collider)
     {
-        Debug.Log("Name : " + collider.gameObject.name);
+        //Debug.Log("Name : " + collider.gameObject.name);
         if (collider.gameObject.name == "Ball")
         {
            // Rigidbody ballRb = collider.gameObject.GetComponent<Rigidbody>();
@@ -37,7 +37,7 @@ public class BallHitDetection : MonoBehaviour
             Debug.Log("Name : " + parent.gameObject.name);
             if (parent.gameObject.name == "Player2")
             {
-                Debug.Log(collider.gameObject.name.ToString());
+                //Debug.Log(collider.gameObject.name.ToString());
                 OnPlayer2Hit?.Invoke(collider);
             }
             else if (parent.gameObject.name == "Player1")
@@ -45,7 +45,7 @@ public class BallHitDetection : MonoBehaviour
                 GameManager.isPlayerOneServing = true;
                 Player1Hit(collider);
                     OnBallHit?.Invoke(ballHit, collider); 
-                Debug.Log("Name : " + parent.gameObject.name);
+              
 
             }
             //Debug.Log(collider.gameObject.name); return true;

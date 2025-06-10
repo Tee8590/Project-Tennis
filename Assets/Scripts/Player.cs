@@ -10,28 +10,23 @@ public class Player : MonoBehaviour
     private Rigidbody ballRb;
     [SerializeField]
     private BallHitDetection ballHitDetection;
+    public Vector3 predictedBallPosition;
     void Start()
     {
        
     }
     void FixedUpdate()
     {
-       if( ball = GameObject.FindGameObjectWithTag("Ball"))
-              ballRb = ball.GetComponent<Rigidbody>();
-        
+
+        if (Ball.Instance != null)
+        {
+            ball = Ball.Instance.ballRb.gameObject;
+            ballRb = Ball.Instance.ballRb;
+        }
+        else Debug.LogError("Null Ball.Instance");
+
         StartFollowTheBall();
         
-    }
-    
-    void PlayerMovement()
-    {
-       
-        if (ball != null)
-        {
-            Vector3 currentPosition = transform.position;
-            float targetX = Mathf.Lerp(currentPosition.x, ball.transform.position.x, moveSpeed * Time.deltaTime);
-            transform.position = new Vector3(targetX, currentPosition.y, currentPosition.z);
-        }
     }
     public void StartFollowTheBall()
     {
@@ -53,16 +48,35 @@ public class Player : MonoBehaviour
             }
         }
     }
-    void SwingRange(Vector3 center, float radius)
+    void PlayerMovement()
     {
-        int MaxColliders = 10;
-        Collider[] hitColliders = new Collider[MaxColliders];
-        int numColliders = Physics.OverlapSphereNonAlloc(center, radius, hitColliders);
-        for (int i = 0; i < numColliders; i++)
+        predictedBallPosition = Ball.Instance.landingPos;
+        if(transform.gameObject.name == "Player1") predictedBallPosition.z /= 8;
+
+        if (IsTargetInRange(predictedBallPosition) & ball != null)
         {
+            Vector3 currentPosition = transform.position;
+            float targetZ = predictedBallPosition.z;
 
+           targetZ = Mathf.Lerp(currentPosition.z, targetZ, moveSpeed * Time.deltaTime);
+            float targetX = Mathf.Lerp(currentPosition.x, ball.transform.position.x, moveSpeed * Time.deltaTime);
+            transform.position = new Vector3(targetX, currentPosition.y, targetZ);
         }
-
     }
+    public bool IsTargetInRange(Vector3 target)
+    {
+        Vector3 center = transform.position;
+
+        float minX = center.x - 10f;
+        float maxX = center.x + 10f;
+        float minZ = center.z - 10f;
+        float maxZ = center.z + 10f;
+
+        if (target.x >= minX && target.x <= maxX &&
+                target.z >= minZ && target.z <= maxZ)
+            return true;
+        return false;
+    }
+
 
 }

@@ -219,7 +219,7 @@ public class SwipeControl : MonoBehaviour
         float swipeDistance = Vector2.Distance(startPosition, endPosition);
        
         middlePosition = (start + end)  / 2f + Vector3.up * swipeDistance * arcFactor;
-         Debug.Log("middlePosition" + middlePosition);
+         //Debug.Log("middlePosition" + middlePosition);
         for (int i = 0; i <= noOfPoints; i++)
         {
             float t = i / (float)noOfPoints;
@@ -242,7 +242,7 @@ public class SwipeControl : MonoBehaviour
     {
         if (Ball.Instance == null)
         {
-            Debug.Log("ballPrefab is  null");
+            //Debug.Log("ballPrefab is  null");
             ballPrefab.transform.position = new Vector3(player.transform.position.x,
                 player.transform.position.y +1f,
                 player.transform.position.z + -0.1f);
@@ -376,7 +376,7 @@ public class SwipeControl : MonoBehaviour
         //  Vector3 direction = ballPrefab.transform.LookAt(ballPos, Vector3.forward ); //addforce tryed but stil shit
         
        // Ball.Instance.ballRb.WakeUp();
-        Debug.Log("Force direction: " + direction);
+        //Debug.Log("Force direction: " + direction);
         Ball.Instance.ballRb.AddForce(direction * 4f, ForceMode.VelocityChange);
         /* Debug.Log("Force direction: " + direction);*/
 

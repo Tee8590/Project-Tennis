@@ -29,6 +29,7 @@ public class Ball : MonoBehaviour
     private Vector3 ballDirection;
     private Vector3 directionToPlayer;
     private float dot;
+    public Vector3 landingPos;
     private void Awake()
     {
         if (Instance == null)
@@ -85,7 +86,7 @@ public class Ball : MonoBehaviour
     }
     public Vector3 CreateBallVelocity(Vector3 startPoint, Vector3 direction, float swipeTime, float swipeDistance)
     {
-        Debug.Log("directionvelocity " + direction);
+        //Debug.Log("directionvelocity " + direction);
         Vector3  ogDirection = new Vector3(direction.x, direction.y, direction.y * 2f);
         ballRb = GetComponent<Rigidbody>();
         speed += swipeTime * swipeDistance;
@@ -150,13 +151,13 @@ public class Ball : MonoBehaviour
         }
 
         // Calculate impact position using P = start + v*t + 0.5*g*t^2
-        Vector3 landingPos = startPos
+        landingPos = startPos
                             + startVelocity * t
                             + 0.5f * Physics.gravity * t * t;
         // Ensure Y is exactly groundY (prevent tiny float errors)
         landingPos.y = groundY;
         BallLandingPositionMarker(landingPos);
-        Debug.Log("landingPos"+landingPos);
+        //Debug.Log("landingPos"+landingPos);
 
         return landingPos;
     }
