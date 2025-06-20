@@ -5,8 +5,8 @@ using System;
 public class Ball : MonoBehaviour
 {
     
-    public static Ball Instance;
-   /* public GameObject ballObj = null;*/
+    public static Ball Instance { get; private set; }
+    /* public GameObject ballObj = null;*/
     public Rigidbody ballRb;
     //[SerializeField]
     //private float speedThreshold = 10f;
@@ -24,7 +24,10 @@ public class Ball : MonoBehaviour
     public GameObject trailBallPrefab; // Prefab with Rigidbody and Trail Renderer
     public int noOfPoints = 50;
     public float timeStep = 0.1f;
+
     public static event Action<Rigidbody, Vector3, Vector3> BallStartAndEndpositions;
+    public event Action<Vector3> OnLandingCalculated;
+
 
     private Vector3 ballDirection;
     private Vector3 directionToPlayer;
@@ -47,6 +50,7 @@ public class Ball : MonoBehaviour
 
     void Start()
     {
+       
         /*if(ballObj == null)
         {
             ballObj = Instantiate(gameObject); ballObj.name = "Ball";
@@ -90,7 +94,10 @@ public class Ball : MonoBehaviour
         Vector3  ogDirection = new Vector3(direction.x, direction.y, direction.y * 2f);
         ballRb = GetComponent<Rigidbody>();
         speed += swipeTime * swipeDistance;
-
+        // 
+        //float calculatedSpeed = Mathf.Min(swipeTime * swipeDistance, maxSpeed);
+        //Vector3 velocity = ogDirection.normalized * calculatedSpeed;
+        //
         ballRb.linearVelocity = Vector3.zero;
         ballRb.angularVelocity = Vector3.zero;
      
@@ -158,7 +165,7 @@ public class Ball : MonoBehaviour
         landingPos.y = groundY;
         BallLandingPositionMarker(landingPos);
         //Debug.Log("landingPos"+landingPos);
-
+        OnLandingCalculated?.Invoke(landingPos);
         return landingPos;
     }
     public Vector3 BallLandingPositionMarker(Vector3 lp)

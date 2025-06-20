@@ -1,9 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -77,12 +74,12 @@ public class SwipeControl : MonoBehaviour
     }
     private void Awake()
     {
-       ballHitDetection =  player.GetComponentInChildren<BallHitDetection>();
+      // ballHitDetection =  player.GetComponentInChildren<BallHitDetection>();
 
     }
     private void Start()
     {
-        CreateBall();
+        //CreateBall();
         /* ballPrefab = Ball.Instance.ballObj;*/
     }
     public void Player1SwingAction(Collider collider)
@@ -104,9 +101,10 @@ public class SwipeControl : MonoBehaviour
      
          if (fireAction != null && fireAction.WasPressedThisFrame())
         {
-           /* CreateBall();*/
+            /* CreateBall();*/
             /*//SimulateSwipeRHS();*/
             //OpponentBallDebug();
+            //GameManager.Instance.SetPlayerPositionToInitial(0f);
         }
     }
     private IEnumerator Trail()
@@ -143,7 +141,13 @@ public class SwipeControl : MonoBehaviour
             landingPos = Ball.Instance.CalculateLandingPoint(swipStart, velocity, 18.24f);
             landingPos.z = landingPos.z / 8;
             Ball.Instance.BallLandingPositionMarker(landingPos);
+           GameManager.Instance.IncrementP2Serve();
+            //GameManager.Instance.UpdateServeCount();
+            GameManager.Instance.isBallInPlay = true;
             MakeBallMovement(Ball.Instance.transform.position,  landingPos);
+            GameManager.Instance.isPlayerOneServing = false;
+            GameManager.Instance.isBallTouched = false;
+          
         }
     }
    
@@ -164,8 +168,14 @@ public class SwipeControl : MonoBehaviour
             //ballRb.useGravity = true;
             velocity = Ball.Instance.CreateBallVelocity(startPosition, direction, swipeTime, swipeDistance);
             landingPos = Ball.Instance.CalculateLandingPoint(startPosition, velocity, 18.24f);
+            GameManager.Instance.SetGameStarted(true);
 
+            GameManager.Instance.isBallInPlay = true;
+            Debug.Log("xxxxxxxxxxxxxxxxxxxxxxxxxxisBallInPlay " + GameManager.Instance.isBallInPlay);
             MakeBallMovement(Ball.Instance.transform.position,  landingPos);
+            GameManager.Instance.IncrementP1Serve();
+            GameManager.Instance.isPlayerOneServing = true;
+            GameManager.Instance.isBallTouched = false;
            
             return true;
         }
@@ -180,19 +190,19 @@ public class SwipeControl : MonoBehaviour
         //direction of the ballPrefab in 2D, z is 0 currently
         direction = endPosition - startPosition;*/
       //  direction2D = new Vector2(direction.x, direction.y).normalized;
-        if (GameManager.isPlayerOneServing)
+        if (GameManager.Instance.isPlayerOneServing)
         {
             //CreateBall();
             // BallMovement(ballrb, direction, swipeTime);
             DrawQuadraticBezierPoint(startPoint,  landingPoint);
-            GameManager.isPlayerOneServing = false;
+            GameManager.Instance.SetServer(false);
         }
-        if (!GameManager.isPlayerOneServing)
+        if (!GameManager.Instance.isPlayerOneServing)
         {
             //CreateBall();
             // BallMovement(ballrb, direction, swipeTime);
             DrawQuadraticBezierPoint(startPoint,  landingPoint);
-            GameManager.isPlayerOneServing = true;
+            GameManager.Instance.SetBallTouched(true);
         }
        
     }
@@ -235,37 +245,37 @@ public class SwipeControl : MonoBehaviour
 
         currentPathIndex = 0;
         isMoving = true;
-       StartCoroutine(MoveAlongPath(ballPrefab, path, 1.0f));
+       StartCoroutine(MoveAlongPath(Ball.Instance.ballRb.gameObject, path, 1.0f));
     }
 
-    public Rigidbody CreateBall()
-    {
-        if (Ball.Instance == null)
-        {
-            //Debug.Log("ballPrefab is  null");
-            ballPrefab.transform.position = new Vector3(player.transform.position.x,
-                player.transform.position.y +1f,
-                player.transform.position.z + -0.1f);
-            ballPrefab = Instantiate(ballPrefab); ballPrefab.name = "Ball";
+    //public Rigidbody CreateBall()
+    //{
+    //    if (Ball.Instance == null)
+    //    {
+    //        //Position     Debug.Log("ballPrefab is  null");
+    //        ballPrefab.transform.position = new Vector3(player.transform.position.x,
+    //            player.transform.position.y +1f,
+    //            player.transform.position.z + -0.1f);
+    //        ballPrefab = Instantiate(ballPrefab); ballPrefab.name = "Ball";
 
-            ballrb = ballPrefab.GetComponent<Rigidbody>();
-            /*BallPhysicsOff();*/
-            return ballrb;
-        }
-        else
-        {
-            //if(ballrb != null & ballPrefab != null) 
-            {
-                Debug.Log("ball Instance is not null");
-         /*       ballrb.transform.position = new Vector3(player.transform.position.x,
-                  player.transform.position.y,
-                  player.transform.position.z + 2f);*/
-               /* BallPhysicsOff();*/
-            }
+    //        ballrb = ballPrefab.GetComponent<Rigidbody>();
+    //        /*BallPhysicsOff();*/
+    //        return ballrb;
+    //    }
+    //    else
+    //    {
+    //        //if(ballrb != null & ballPrefab != null) 
+    //        {
+    //            Debug.Log("ball Instance is not null");
+    //     /*       ballrb.transform.position = new Vector3(player.transform.position.x,
+    //              player.transform.position.y,
+    //              player.transform.position.z + 2f);*/
+    //           /* BallPhysicsOff();*/
+    //        }
  
-            return ballrb;
-        }
-    }
+    //        return ballrb;
+    //    }
+    //}
     /* public Rigidbody BallPhysicsOff()
      {
          ballrb.linearVelocity = Vector3.zero;
@@ -381,18 +391,7 @@ public class SwipeControl : MonoBehaviour
         /* Debug.Log("Force direction: " + direction);*/
 
     }
-   /* public void BallMovement(Rigidbody ballRb,Vector3 direction, float swipeTime)
-    {
-        ballRb = ballrb;
-        if (ballRb != null)
-        {
-            //if(!ballHitDetection == true)
-            //    StopCoroutine(slowBallCoroutine);
-            // ballRb.gameObject.transform.position = new Vector3(player.transform.position.x, player.transform.position.y, player.transform.position.z + 2f);
-            ballRb.useGravity = true;
-            ballRb.gameObject.GetComponent<Ball>().CreateBallVelocity(startPosition, direction, swipeTime);
-        }
-    }*/
+  
     
     private void SwipeDirection(Vector2 direction)
     {

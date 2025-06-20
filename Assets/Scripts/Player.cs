@@ -5,7 +5,7 @@ public class Player : MonoBehaviour
     //private int Colliders = 10;
     private GameObject ball;
     public float moveSpeed = 20.0f;
-    [SerializeField]
+    //[SerializeField]
     //private BoxCollider HItboxCollider;
     private Rigidbody ballRb;
     [SerializeField]
@@ -50,13 +50,15 @@ public class Player : MonoBehaviour
     }
     void PlayerMovement()
     {
+        if(!GameManager.Instance.isBallInPlay) return;
+
         predictedBallPosition = Ball.Instance.landingPos;
-        if(transform.gameObject.name == "Player1") predictedBallPosition.z /= 8;
+        if(transform.gameObject.name == "Player1") predictedBallPosition.z /= 6;
 
         if (IsTargetInRange(predictedBallPosition) & ball != null)
         {
             Vector3 currentPosition = transform.position;
-            float targetZ = predictedBallPosition.z;
+            float targetZ = predictedBallPosition.z-2f;
 
            targetZ = Mathf.Lerp(currentPosition.z, targetZ, moveSpeed * Time.deltaTime);
             float targetX = Mathf.Lerp(currentPosition.x, ball.transform.position.x, moveSpeed * Time.deltaTime);

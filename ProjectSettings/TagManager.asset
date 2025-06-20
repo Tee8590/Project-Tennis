@@ -7,6 +7,9 @@ TagManager:
   - Ball
   - Player1
   - Player2
+  - BallPos
+  - CommonCort
+  - ServiceBox
   layers:
   - Default
   - TransparentFX
